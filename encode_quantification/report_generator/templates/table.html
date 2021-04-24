@@ -1,0 +1,21 @@
+<table class="table table-bordered table-hover w-auto table-striped">
+    <thead>
+      <tr>
+        {% for col in section.table.header %}
+            <th scope="col">{{col}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+        {% for row in section.table.rows %}
+        <tr>
+            {% for val in row %}
+                <td>{{val}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  {% if section.table.comment %}
+    <div>*{{section.table.comment}}</div>
+  {% endif %}

@@ -1,0 +1,6 @@
+<div class='p-3'>
+<h3>{{plot.title}}</h3>
+{{plot.html_str | safe }}
+<a class="btn btn-primary" href="plots/{{plot.title}}.pdf" target="_blank" download> Download PDF</a>
+<a class="btn btn-primary" href="plots/{{plot.title}}.png" target="_blank" download> Download PNG</a>
+</div>

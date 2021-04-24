@@ -1,0 +1,25 @@
+<!doctype html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
+	<script src="assets/plotly-latest.min.js"></script>
+</head>
+<title>Report</title>
+<div>
+    <div class = 'row align-items-start'>
+        <div class="col-2 position-sticky top-0 start-0">
+            <ul class="nav flex-column border bg-primary w-50" >
+              {% for section in sections %}
+              <li class="nav-item border p-3">
+                <a class="nav-link text-light" href="#{{section.id}}">{{section.name}}</a>
+              </li>
+              {% endfor %}
+                </ul>
+          </div>
+          <div class="col-10">
+            {% for section in sections %}
+              {% include "section.html" %}
+            {% endfor %}
+          </div>
+    </div>
+</div>

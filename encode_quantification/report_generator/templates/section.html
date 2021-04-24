@@ -1,0 +1,17 @@
+<div class='p-3'>
+<h1 id='{{section.id}}'>{{section.name}}</h1>
+<hr>
+{% if section.legend %}
+    {% include "legend.html" %}
+{% endif %}
+
+{% if section.table %}
+    {% include "table.html" %}
+{% endif %}
+
+{% if section.plots %}
+{% for plot in section.plots %}
+    {% include "plot.html" %}
+{% endfor %}
+{% endif %}
+</div>

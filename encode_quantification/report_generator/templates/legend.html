@@ -1,0 +1,17 @@
+<table class="table table-bordered table-hover w-auto table-striped">
+    <thead>
+      <tr>
+        {% for col in section.legend.header %}
+            <th scope="col">{{col}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+        {% for row in section.legend.rows %}
+        <tr>
+            <td>{{row.name}}</td>
+            <td style="background-color:{{row.color}};"></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
