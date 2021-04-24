@@ -1,28 +1,20 @@
-# encode_quantification
+# LRGASP visualization
 ## Requirements
 You should have python 3.6+ and linux installed on your machine
 ## Install
 ```
-git clone https://github.com/Tidesun/encode_quantification.git
-cd encode_quantification
+git clone https://github.com/Tidesun/LRGASP_visualization.git
+cd LRGASP_visualization
 python -m venv base
 source base/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 ## Usage
-### Participant website
-```
-source base/bin/activate
-python encode_quantification/index.py
-```
-Open the link in your browser after the prompt shown in your terminal \
-Annotation results and true expression files should be in tsv format and annotation should be in gtf format.
 ### Organizer reporter
 ```
 source base/bin/activate
-cd encode_quantification
-python -m report_generator.main -a ANNOTATION -r RESULT -t TRUTH -o OUTPUT --num_method NUM_METHOD  --num_samples NUM_SAMPLES
+python encode_quantification/main.py -a ANNOTATION -r RESULT -t TRUTH -o OUTPUT --num_method NUM_METHOD  --num_samples NUM_SAMPLES
 ```
 ```
 Quantification evaluation reporter
