@@ -6,28 +6,25 @@ table_comment = {
     # 'consistency':'Resolution Entropy (RE) is calculated by the',
     'reproducibility':'Reproducibility Measure (RM) is calculated by the L2 norm of the standard deviation',
 }
-def generate_table(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections):
-    input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
+def generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections):
     data, columns = [],[]
     if (is_multi_method == False):
+        df,anno_df = args
         if (is_multi_sample == False):
-            df,anno_df = preprocess_single_sample(input_paths,1,is_long_read,K_value_selection)
             data.append(prepare_single_sample_table_metrics(df['true_abund'], df['estimated_abund'],df))
             columns = [m for m in single_sample_table_metrics if m['id'] in data[0]]
         else:
-            df,anno_df = preprocess_multi_sample_diff_condition(input_paths,True,is_long_read,K_value_selection)
             data.append(prepare_multi_sample_diff_conditon_table_metrics(df,True))
             columns = [m for m in multi_sample_diff_condition_table_metrics if m['id'] in data[0]]
     else:
+        dfs,anno_df,method_names = args
         if (is_multi_sample == False):
-            dfs,anno_df,method_names = preprocess_single_sample_multi_method(input_paths,1,is_long_read,K_value_selection)
             for df,method_name in zip(dfs,method_names):
                 row_dict = prepare_single_sample_table_metrics(df['true_abund'], df['estimated_abund'],df)
                 row_dict['method'] = method_name
                 data.append(row_dict)
             columns = [{'name': 'Method', 'id': 'method'}]+[m for m in single_sample_table_metrics if m['id'] in data[0]]
         else:
-            dfs,anno_df,method_names = preprocess_multi_sample_multi_method(input_paths,True,is_long_read,K_value_selection)
             for df,method_name in zip(dfs,method_names):
                 row_dict = prepare_multi_sample_diff_conditon_table_metrics(df,True)
                 row_dict['method'] = method_name

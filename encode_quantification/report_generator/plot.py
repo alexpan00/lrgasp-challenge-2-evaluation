@@ -96,12 +96,11 @@ def generate_method_legend(method_names):
     header = ['Method name','Color']
     rows = [{'name':name,'color':color_schemes[i]} for i,name in zip(range(len(method_names)),method_names)]
     return {'header':header,'rows':rows}
-def make_plots(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections):
+def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections):
     section_indices =  {sections[index]['id']:index for index in range(len(sections))}
-    input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
     if (is_multi_method == False):
+        df,anno_df = args
         if (is_multi_sample == False):
-            df,anno_df = preprocess_single_sample(input_paths,1,is_long_read,K_value_selection)
             plotter = Single_sample_plotter(df,anno_df)
             for plot_figure_name in single_sample_plot_figures:
                 define_write_to_file_theme()
@@ -113,7 +112,6 @@ def make_plots(quantif_res_path,annotation_path,truth_path,output_path,is_multi_
                 section_id = single_sample_plot_figures[plot_figure_name]['type']
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
         else:
-            df,anno_df = preprocess_multi_sample_diff_condition(input_paths,True,is_long_read,K_value_selection)
             plotter = Multi_sample_plotter(df,anno_df)
             for plot_figure_name in multi_sample_diff_condition_with_ground_truth_plot_figures:
                 define_write_to_file_theme()
@@ -125,8 +123,8 @@ def make_plots(quantif_res_path,annotation_path,truth_path,output_path,is_multi_
                 section_id = multi_sample_diff_condition_with_ground_truth_plot_figures[plot_figure_name]['type']
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
     else:
+        dfs,anno_df,method_names = args
         if (is_multi_sample == False):
-            dfs,anno_df,method_names = preprocess_single_sample_multi_method(input_paths,1,is_long_read,K_value_selection)
             sections[1]['legend'] = generate_method_legend(method_names)
             plotter = Single_sample_multi_method_plotter(dfs,anno_df,method_names)
             for plot_figure_name in single_sample_plot_figures:
@@ -139,7 +137,6 @@ def make_plots(quantif_res_path,annotation_path,truth_path,output_path,is_multi_
                 section_id = single_sample_plot_figures[plot_figure_name]['type']
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
         else:
-            dfs,anno_df,method_names = preprocess_multi_sample_multi_method(input_paths,True,is_long_read,K_value_selection)
             sections[1]['legend'] = generate_method_legend(method_names)
             plotter = Multi_sample_multi_method_plotter(dfs,anno_df,method_names)
             for plot_figure_name in multi_sample_diff_condition_with_ground_truth_plot_figures:

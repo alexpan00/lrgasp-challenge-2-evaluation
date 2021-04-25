@@ -2,7 +2,7 @@ from jinja2 import Environment, FileSystemLoader,select_autoescape
 import os
 import shutil
 import argparse
-
+from preprocess import *
 from report_generator.plot import make_plots
 from report_generator.table import generate_table
 from plot_func.multi_method_plotter import Multi_method_plotter
@@ -18,7 +18,7 @@ all_sections = [
 ]
 def generate_output(output,output_path):
     des_assets_path = os.path.join(output_path,'assets') 
-    src_assets_dir = 'report_generator/templates/assets'
+    src_assets_dir = 'encode_quantification/report_generator/templates/assets'
     for src_dir, dirs, files in os.walk(src_assets_dir):
         dst_dir = src_dir.replace(src_assets_dir, des_assets_path, 1)
         if not os.path.exists(dst_dir):
@@ -31,6 +31,21 @@ def generate_output(output,output_path):
             shutil.copy(src_file, dst_dir)
     with open(os.path.join(output_path,'Report.html'),'w') as f:
         f.write(output)
+def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection):
+    input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
+    if (is_multi_method == False):
+        if (is_multi_sample == False):
+            df,anno_df = preprocess_single_sample(input_paths,1,is_long_read,K_value_selection)
+        else:
+            df,anno_df = preprocess_multi_sample_diff_condition(input_paths,True,is_long_read,K_value_selection)
+        return df,anno_df
+    else:
+        if (is_multi_sample == False):
+            dfs,anno_df,method_names = preprocess_single_sample_multi_method(input_paths,1,is_long_read,K_value_selection)
+        else:
+            dfs,anno_df,method_names = preprocess_multi_sample_multi_method(input_paths,True,is_long_read,K_value_selection)
+        return dfs,anno_df,method_names
+    
 def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection):
     env = Environment(loader=FileSystemLoader('encode_quantification/report_generator/templates'),autoescape=select_autoescape(['html']))
     template = env.get_template('base.html')
@@ -41,8 +56,17 @@ def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_samp
         sections = sections + all_sections[2:]
     else:
         sections = sections + all_sections[2:4] + [all_sections[7]]
-    sections = make_plots(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
-    sections = generate_table(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+    if (is_multi_method == False):
+        df,anno_df = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection)
+        args = (df,anno_df)
+        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+
+    else:
+        dfs,anno_df,method_names = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection) 
+        args = (dfs,anno_df,method_names)
+        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
     output = template.render(sections=sections)
     generate_output(output,output_path)
 def parse_arguments():
