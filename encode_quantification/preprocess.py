@@ -65,6 +65,7 @@ def preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given,i
         estimated_df = estimated_df.loc[intersected_index,:].reset_index()
         true_expression_df = true_expression_df.loc[intersected_index,:].reset_index()
     else:
+        estimated_df = estimated_df.reset_index()
         true_expression_df = None
     anno_df = pd.DataFrame({'K_value':pd.Series(kvalues_dict),'num_exons':pd.Series(num_exon_dict),'isoform_length':pd.Series(isoform_length_dict),'gene':pd.Series(isoform_gene_dict)})
     anno_df.index.name = 'isoform'
@@ -104,10 +105,15 @@ def preprocess_multi_sample_multi_method(list_of_contents,ground_truth_given,is_
     dfs = []
     for estimated_df in estimated_dfs:
         estimated_df = estimated_df.set_index(0)
-        intersected_index = true_expression_df.index.intersection(estimated_df.index)
-        estimated_df = estimated_df.loc[intersected_index,:].reset_index()
-        temp_true_expression_df = true_expression_df.loc[intersected_index,:].reset_index()
-        dfs.append(preprocess_multi_sample_diff_condition_util(estimated_df,temp_true_expression_df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict))
+        if (ground_truth_given):
+            intersected_index = true_expression_df.index.intersection(estimated_df.index)
+            estimated_df = estimated_df.loc[intersected_index,:].reset_index()
+            temp_true_expression_df = true_expression_df.loc[intersected_index,:].reset_index()
+            dfs.append(preprocess_multi_sample_diff_condition_util(estimated_df,temp_true_expression_df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict))
+        else:
+            estimated_df = estimated_df.reset_index()
+            dfs.append(preprocess_multi_sample_diff_condition_util(estimated_df,None, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict))
+
     anno_df = pd.DataFrame({'K_value':pd.Series(kvalues_dict),'num_exons':pd.Series(num_exon_dict),'isoform_length':pd.Series(isoform_length_dict),'gene':pd.Series(isoform_gene_dict)})
     anno_df.index.name = 'isoform'
     anno_df = anno_df.reset_index()

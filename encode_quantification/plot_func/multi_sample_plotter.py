@@ -46,9 +46,9 @@ class Multi_sample_plotter(Plotter):
             width=fig_size['rec']['width'],height=fig_size['rec']['height']*2,template= themes['small_multi']
         )
         return fig
-    def plot_stats_box(self,scale):
+    def plot_stats_box(self,y_axis_column_name,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
-        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df)
+        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,y_axis_column_name)
         col_num = len(cond1_metric_dicts)
         fig = make_subplots(rows=1, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,)
         for i,cond1_metric_dict,cond2_metric_dict in zip(range(col_num),cond1_metric_dicts,cond2_metric_dicts):
@@ -242,15 +242,15 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_resolution_entropy(self,scale):
         fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
-        plot_df = filter_by_scale(scale, plot_df)
-        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df)
+        plot_df = filter_by_scale(scale, self.plot_df)
+        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,'RE')
         cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
         cond2_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
         col_num = len(cond1_metric_dicts)
         for i,cond1_metric_dict,cond2_metric_dict in zip(range(col_num),cond1_metric_dicts,cond2_metric_dicts):
             M = on_plot_shown_label[cond1_metric_dict['Metric']]
-            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),showlegend=False,marker_color=color_schemes[j]),row=1,col=i+1)
-            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),showlegend=False,marker_color=color_schemes[j]),row=2,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),showlegend=False),row=1,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),showlegend=False),row=2,col=i+1)
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             width=540,
@@ -303,14 +303,14 @@ class Multi_sample_plotter(Plotter):
         elif plot_figure_name == 'Histogram of Abundance Recovery Rate':
             fig = self.plot_arr(x_axis_column_name, scale)
         elif plot_figure_name == 'Estimation Error for different conditions':
-            fig = self.plot_stats_box(scale)
+            fig = self.plot_stats_box(y_axis_column_name,scale)
         elif plot_figure_name == 'Standard deviation vs estimated abundance curve':
             fig = self.plot_multi_sample_std_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Consistency Measure curve':
             fig = self.plot_consistency_measure_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Correlation Boxplot of estimated abundance and ground truth':
             fig = self.plot_multi_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)
-        elif plot_figure_name == 'Resolution Entropy':
+        elif plot_figure_name == 'Resolution Entropy for different conditions':
             fig = self.plot_resolution_entropy(scale)
         try:
             fig.update_layout(title=plot_figure_name, title_x=0.5)

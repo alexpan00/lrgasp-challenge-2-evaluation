@@ -96,7 +96,7 @@ def generate_method_legend(method_names):
     header = ['Method name','Color']
     rows = [{'name':name,'color':color_schemes[i]} for i,name in zip(range(len(method_names)),method_names)]
     return {'header':header,'rows':rows}
-def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections):
+def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections):
     section_indices =  {sections[index]['id']:index for index in range(len(sections))}
     if (is_multi_method == False):
         df,anno_df = args
@@ -113,14 +113,18 @@ def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_v
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
         else:
             plotter = Multi_sample_plotter(df,anno_df)
-            for plot_figure_name in multi_sample_diff_condition_with_ground_truth_plot_figures:
+            if (ground_truth_given):
+                figures = multi_sample_diff_condition_with_ground_truth_plot_figures
+            else:
+                figures = multi_sample_diff_condition_without_ground_truth_plot_figures
+            for plot_figure_name in figures:
                 define_write_to_file_theme()
-                fig = plotter.plot(plot_figure_name, 'all',True)
+                fig = plotter.plot(plot_figure_name, 'all',ground_truth_given)
                 write_plot_files(fig,plot_figure_name,output_path)
                 define_presentation_theme()
-                fig = plotter.plot(plot_figure_name, 'all',True)
+                fig = plotter.plot(plot_figure_name, 'all',ground_truth_given)
                 html_str = get_html_str(fig,plot_figure_name,output_path)
-                section_id = multi_sample_diff_condition_with_ground_truth_plot_figures[plot_figure_name]['type']
+                section_id = figures[plot_figure_name]['type']
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
     else:
         dfs,anno_df,method_names = args
@@ -139,14 +143,18 @@ def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_v
         else:
             sections[1]['legend'] = generate_method_legend(method_names)
             plotter = Multi_sample_multi_method_plotter(dfs,anno_df,method_names)
-            for plot_figure_name in multi_sample_diff_condition_with_ground_truth_plot_figures:
+            if (ground_truth_given):
+                figures = multi_sample_diff_condition_with_ground_truth_plot_figures
+            else:
+                figures = multi_sample_diff_condition_without_ground_truth_plot_figures
+            for plot_figure_name in figures:
                 define_write_to_file_theme()
-                fig = plotter.plot(plot_figure_name, 'all',True)
+                fig = plotter.plot(plot_figure_name, 'all',ground_truth_given)
                 write_plot_files(fig,plot_figure_name,output_path)
                 define_presentation_theme()
-                fig = plotter.plot(plot_figure_name, 'all',True)
+                fig = plotter.plot(plot_figure_name, 'all',ground_truth_given)
                 html_str = get_html_str(fig,plot_figure_name,output_path)
-                section_id = multi_sample_diff_condition_with_ground_truth_plot_figures[plot_figure_name]['type']
+                section_id = figures[plot_figure_name]['type']
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
     return sections
     

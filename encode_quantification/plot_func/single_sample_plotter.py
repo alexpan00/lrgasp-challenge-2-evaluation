@@ -122,6 +122,17 @@ class Single_sample_plotter(Plotter):
             yaxis_title= 'Log2(Estimated abundance+1)',
             autosize=False,showlegend=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'])
         return fig
+
+    def plot_resolution_entropy(self,scale):
+        fig = go.Figure()
+        plot_df = filter_by_scale(scale, self.plot_df)
+        RE = [get_resolution_entropy(plot_df['estimated_abund'],100)]
+        fig.add_trace(go.Bar(x=['Resolution Entropy'],
+                    y=RE,marker_color=color_schemes[0]))
+        fig.update_layout(
+            width=fig_size['small_rec']['width'],height=fig_size['small_rec']['height'],template=themes['medium_single']
+        )
+        return fig
     def plot(self,plot_figure_name, scale):
         x_axis_column_name = single_sample_plot_figures[plot_figure_name]['x']
         y_axis_column_name = single_sample_plot_figures[plot_figure_name]['y']
@@ -137,7 +148,12 @@ class Single_sample_plotter(Plotter):
             fig = self.plot_std_scatter(x_axis_column_name, y_axis_column_name, scale)
         elif plot_figure_name == 'Correlation Boxplot of estimated abundance and ground truth':
             fig = self.plot_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)
-        fig.update_layout(title=plot_figure_name, title_x=0.5)
-        fig.update_xaxes(exponentformat='e',automargin=True)
-        fig.update_yaxes(exponentformat='e',automargin=True)
+        elif plot_figure_name == 'Resolution Entropy':
+            fig = self.plot_resolution_entropy(scale)
+        try:
+            fig.update_layout(title=plot_figure_name, title_x=0.5)
+            fig.update_xaxes(exponentformat='e',automargin=True)
+            fig.update_yaxes(exponentformat='e',automargin=True)
+        except:
+            print(plot_figure_name)
         return fig

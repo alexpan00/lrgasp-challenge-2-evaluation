@@ -31,42 +31,48 @@ def generate_output(output,output_path):
             shutil.copy(src_file, dst_dir)
     with open(os.path.join(output_path,'Report.html'),'w') as f:
         f.write(output)
-def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection):
+def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection):
     input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
     if (is_multi_method == False):
         if (is_multi_sample == False):
             df,anno_df = preprocess_single_sample(input_paths,1,is_long_read,K_value_selection)
         else:
-            df,anno_df = preprocess_multi_sample_diff_condition(input_paths,True,is_long_read,K_value_selection)
+            df,anno_df = preprocess_multi_sample_diff_condition(input_paths,ground_truth_given,is_long_read,K_value_selection)
         return df,anno_df
     else:
         if (is_multi_sample == False):
             dfs,anno_df,method_names = preprocess_single_sample_multi_method(input_paths,1,is_long_read,K_value_selection)
         else:
-            dfs,anno_df,method_names = preprocess_multi_sample_multi_method(input_paths,True,is_long_read,K_value_selection)
+            dfs,anno_df,method_names = preprocess_multi_sample_multi_method(input_paths,ground_truth_given,is_long_read,K_value_selection)
         return dfs,anno_df,method_names
     
-def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection):
+def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection):
     env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__),'report_generator/templates')),autoescape=select_autoescape(['html']))
     template = env.get_template('base.html')
-    sections = [all_sections[0]]
+    sections_num = [0]
     if (is_multi_method):
-        sections = sections + [all_sections[1]]
+        sections_num = sections_num + [1]
+    if (ground_truth_given):
+        sections_num  = sections_num + [2]
     if (is_multi_sample):
-        sections = sections + all_sections[2:]
+        sections_num = sections_num + [3,4,5,7]
+        if (ground_truth_given):
+            sections_num  = sections_num + [6]
     else:
-        sections = sections + all_sections[2:4] + [all_sections[7]]
+        sections_num = sections_num + [3,7]
+    sections_num.sort()
+    sections = [all_sections[i] for i in sections_num]
     if (is_multi_method == False):
-        df,anno_df = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection)
+        df,anno_df = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection)
         args = (df,anno_df)
-        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
-        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
+        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
 
     else:
-        dfs,anno_df,method_names = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection) 
+        dfs,anno_df,method_names = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection) 
         args = (dfs,anno_df,method_names)
-        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
-        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection,sections)
+        sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
+        sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
     output = template.render(sections=sections)
     generate_output(output,output_path)
 def parse_arguments():
@@ -78,7 +84,7 @@ def parse_arguments():
     requiredNamed = parser.add_argument_group('required named arguments')
     requiredNamed.add_argument('-a','--annotation', type=str, help="The path of annotation file [GTF]",required=True)
     requiredNamed.add_argument('-r','--result', type=str, help="The path of quantification result file [TSV\ZIP]",required=True)
-    requiredNamed.add_argument('-t','--truth', type=str, help="The path of true expression file [TSV]",required=True)
+    requiredNamed.add_argument('-t','--truth', type=str, help="The path of true expression file [TSV]")
     requiredNamed.add_argument('-o','--output', type=str, help="The path of output directory",required=True)
      
     requiredNamed.add_argument('--num_method',  type=str,help="Whether multi method data given ['Single' or 'Multi']")
@@ -90,10 +96,20 @@ def parse_arguments():
     # optional.add_argument('--num_iterations',type=int,default=100, help="Number of iterations for EM algorithm [default:100]")
     
     args = parser.parse_args()
-    is_multi_method = True if args.num_method == 'Multi' else False
+    ground_truth_given = args.truth is not None
+    if args.num_method == 'Multi':
+        is_multi_method = True
+        if not args.result.endswith('.zip'):
+            raise Exception('Invalid file format given')
+    else:
+        is_multi_method = False
+        if not args.result.endswith('.tsv'):
+            raise Exception('Invalid file format given')
     is_multi_sample = True if args.num_samples == 'Multi' else False
     is_long_read = True if args.seq == 'LongRead' else False
-    render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,args.K_value_selection)
+    if (not ground_truth_given) and (not is_multi_sample):
+        raise Exception('No evaluation can be done for single sample data without ground truth!')
+    render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,args.K_value_selection)
 if __name__ == "__main__":
     parse_arguments()
 # annotation_path = '/home/tidesun/data/zebrafish/Danio_rerio.gtf'

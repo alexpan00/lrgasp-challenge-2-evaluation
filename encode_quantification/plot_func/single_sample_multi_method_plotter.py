@@ -37,7 +37,6 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
         for i,plot_df,method_name in zip(range(len(self.method_names)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             RE = [get_resolution_entropy(plot_df['estimated_abund'],100)]
-            print(RE)
             fig.add_trace(go.Bar(x=['Resolution Entropy'],
                         y=RE,name=method_name,marker_color=color_schemes[i]))
         fig.update_layout(
@@ -143,7 +142,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
     #         autosize=False,showlegend=True,width=fig_size['small_square']['width']*len(self.plot_dfs),height=fig_size['small_square']['height'],template=themes['small_multi'])
     #     return fig
     def plot_corr_box_plot(self,x_axis_column_name,y_axis_column_name,scale):
-        fig = make_subplots(rows=1, cols=1,subplot_titles=self.method_names)
+        fig = make_subplots(rows=1, cols=1)
         shared_bins_cond = None
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
@@ -153,7 +152,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_xaxes(title_text='Log2(True abundance+1)')
         fig.update_yaxes(title_text='Log2(Estimated abundance+1)')
         fig.update_layout(boxmode = "group",
-            autosize=False,showlegend=True,width=fig_size['large_square']['width'],height=fig_size['large_square']['height'],template=themes['large_single'])
+            autosize=False,showlegend=True,width=fig_size['square']['width'],height=fig_size['square']['height'],template=themes['large_single'])
         return fig
     def plot(self,plot_figure_name, scale):
         x_axis_column_name = single_sample_plot_figures[plot_figure_name]['x']
@@ -172,7 +171,10 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Resolution Entropy':
             fig = self.plot_resolution_entropy(scale)
-        fig.update_layout(title=plot_figure_name, title_x=0.5)
-        fig.update_xaxes(exponentformat='e',automargin=True)
-        fig.update_yaxes(exponentformat='e',automargin=True)
+        try:
+            fig.update_layout(title=plot_figure_name, title_x=0.5)
+            fig.update_xaxes(exponentformat='e',automargin=True)
+            fig.update_yaxes(exponentformat='e',automargin=True)
+        except:
+            print(plot_figure_name)
         return fig

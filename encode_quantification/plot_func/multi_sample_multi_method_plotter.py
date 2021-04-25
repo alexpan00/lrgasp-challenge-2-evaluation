@@ -47,13 +47,13 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             width=fig_size['rec']['width']*1.5,height=fig_size['rec']['height']*2,template= themes['small_multi']
         )
         return fig
-    def plot_stats_box(self,scale):
-        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(self.plot_dfs[0])
+    def plot_stats_box(self,y_axis_column_names,scale):
+        [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(self.plot_dfs[0],y_axis_column_names)
         col_num = len(cond1_metric_dicts)
         fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
-            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df)
+            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
             cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] in ['nrmse','mrd','spearmanr']]
             cond2_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] in ['nrmse','mrd','spearmanr']]
             col_num = len(cond1_metric_dicts)
@@ -73,7 +73,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
-            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df)
+            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
             cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
             cond2_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
             col_num = len(cond1_metric_dicts)
@@ -276,7 +276,6 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_layout(autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
         return fig
     def plot_grouped_violin(self,x_axis_column_name, y_axis_column_names, scale):
-        
         violin_column_names = [x for x in y_axis_column_names if x in ['nrmse','mrd','mean_arr','spearmanr','RE']]
         line_column_names = [x for x in y_axis_column_names if x not in ['nrmse','mrd','mean_arr','spearmanr','RE']]
         line_figure_cols = math.ceil(math.sqrt(len(line_column_names)))
@@ -371,16 +370,19 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         elif plot_figure_name == 'Histogram of Abundance Recovery Rate':
             fig = self.plot_arr(x_axis_column_name, scale)
         elif plot_figure_name == 'Estimation Error for different conditions':
-            fig = self.plot_stats_box(scale)
+            fig = self.plot_stats_box(y_axis_column_name,scale)
         elif plot_figure_name == 'Standard deviation vs estimated abundance curve':
             fig = self.plot_multi_sample_std_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Consistency Measure curve':
             fig = self.plot_consistency_measure_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Correlation Boxplot of estimated abundance and ground truth':
             fig = self.plot_multi_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)
-        elif plot_figure_name == 'Resolution Entropy':
+        elif plot_figure_name == 'Resolution Entropy for different conditions':
             fig = self.plot_resolution_entropy(scale)
-        fig.update_layout(title=plot_figure_name, title_x=0.5)
-        fig.update_xaxes(exponentformat='e',automargin=True)
-        fig.update_yaxes(exponentformat='e',automargin=True)
+        try:
+            fig.update_layout(title=plot_figure_name, title_x=0.5)
+            fig.update_xaxes(exponentformat='e',automargin=True)
+            fig.update_yaxes(exponentformat='e',automargin=True)
+        except:
+            print(plot_figure_name)
         return fig

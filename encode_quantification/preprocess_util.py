@@ -170,23 +170,35 @@ def prepare_grouped_violin_data(metric,df,agg_gene=False):
             temp = df[arr_columns[i]].mean()
             all_samples_metric.append(temp)
     return np.array(all_samples_metric)
-def prepare_stats_box_plot_data(df):
+def prepare_stats_box_plot_data(df,y_axis_names):
     estimated_columns = [x for x in list(df.columns) if 'estimated_abund_' in x]
     true_columns = [x for x in list(df.columns) if 'true_abund_' in x]
     all_cond_metric_dicts = []
     for start_col,end_col in zip([0,len(estimated_columns)//2],[len(estimated_columns)//2,len(estimated_columns)]):
         metric_dicts = []
-        for metric in ['nrmse','mrd','spearmanr','RE']:
-            metric_dict = {}
-            vals = []
-            for i in range(start_col,end_col):
-                true_column = true_columns[i]
-                estimated_column = estimated_columns[i]
-                vals.append(get_single_sample_metric(metric,df[true_column], df[estimated_column],df))
-            metric_dict['Metric'] = metric
-            metric_dict['Mean'] = np.mean(vals)
-            metric_dict['Error'] = np.std(vals)
-            metric_dicts.append(metric_dict)
+        for metric in ['nrmse','mrd','spearmanr']:
+            if metric in y_axis_names:
+                metric_dict = {}
+                vals = []
+                for i in range(start_col,end_col):
+                    true_column = true_columns[i]
+                    estimated_column = estimated_columns[i]
+                    vals.append(get_single_sample_metric(metric,df[true_column], df[estimated_column],df))
+                metric_dict['Metric'] = metric
+                metric_dict['Mean'] = np.mean(vals)
+                metric_dict['Error'] = np.std(vals)
+                metric_dicts.append(metric_dict)
+        for metric in ['RE']:
+            if metric in y_axis_names:
+                metric_dict = {}
+                vals = []
+                for i in range(start_col,end_col):
+                    estimated_column = estimated_columns[i]
+                    vals.append(get_single_sample_metric(metric,None, df[estimated_column],df))
+                metric_dict['Metric'] = metric
+                metric_dict['Mean'] = np.mean(vals)
+                metric_dict['Error'] = np.std(vals)
+                metric_dicts.append(metric_dict)
         all_cond_metric_dicts.append(metric_dicts)
 
     return all_cond_metric_dicts

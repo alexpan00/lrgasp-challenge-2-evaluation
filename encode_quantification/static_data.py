@@ -93,7 +93,7 @@ single_sample_table_metrics = [
     {'name': 'Normalized Root Mean Square Error', 'id': 'nrmse','type':'numeric','format':{'specifier':'.3f'},},
     {'name': 'Median Relative Difference', 'id': 'mrd','type':'numeric','format':{'specifier':'.3f'}},
     {'name':'Mean Abundance Recovery Rate','id':'mean_arr','type':'numeric','format':{'specifier':'.1%'}},
-    # {'name': "Spearman's rho", 'id': 'spearmanr','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': "Spearman's rho", 'id': 'spearmanr','type':'numeric','format':{'specifier':'.3f'}},
     {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
 ]
 multi_sample_diff_condition_table_metrics = [
@@ -117,6 +117,7 @@ multi_sample_diff_condition_table_metrics = [
 multi_sample_diff_condition_without_ground_truth_table_metrics = [
     {'name': 'Consistency Measure', 'id': 'CM','type':'numeric','format':{'specifier':'.3f'}},
     {'name': 'Reproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
 ]
 
 single_sample_plot_figures = {
@@ -138,12 +139,12 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     'Distribution of isoform lengths':{'x':'isoform_length','y':'dist','type':'gene_features'},
     'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
 
-    'Estimation Error for different conditions':{'x':'metrics','y':'vals','type':'estimation_error'},
+    'Estimation Error for different conditions':{'x':'metrics','y':['nrmse','mrd','spearmanr'],'type':'estimation_error'},
     'Histogram of Abundance Recovery Rate':{'x':'arr','y':'freq','type':'estimation_error'},
     'Correlation of estimated abundance and ground truth':{'x':['ave_true_abund#1','ave_true_abund#2'],'y':['ave_estimated_abund#1','ave_estimated_abund#2'],'type':'estimation_error'},
     'Correlation Boxplot of estimated abundance and ground truth':{'x':['ave_true_abund#1','ave_true_abund#2'],'y':['ave_estimated_abund#1','ave_estimated_abund#2'],'type':'estimation_error'},
     
-    # 'Resolution Entropy':{'x':'','y':'RE','type':'resolution_entropy'},
+    'Resolution Entropy for different conditions':{'x':'','y':'RE','type':'resolution_entropy'},
     
     'Consistency Measure curve':{'x':'C threshold','y':'CM','type':'consistency'},
     # 'Standard deviation vs estimated abundance scatter':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
@@ -160,16 +161,14 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     
 }
 multi_sample_diff_condition_without_ground_truth_plot_figures = {
-    'Distribution of K values':{'x':'K_value','y':'dist'},
-    'Distribution of isoform lengths':{'x':'isoform_length','y':'dist'},
-    'Distribution of numbers of exons':{'x':'num_exons','y':'dist'},
-    'Standard deviation vs estimated abundance scatter':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2']},
-    'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics]},
-    'Statistics with different isoform lengths':{'x':'isoform_length','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics]},
-    'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics]},
-}
-multi_sample_same_condition_plot_figures = {
-    'Standard deviation vs estimated abundance scatter':{'x':'ave_estimated_abund','y':'std'}
+    'Distribution of K values':{'x':'K_value','y':'dist','type':'gene_features'},
+    'Distribution of isoform lengths':{'x':'isoform_length','y':'dist','type':'gene_features'},
+    'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
+    'Standard deviation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
+    'Resolution Entropy for different conditions':{'x':'','y':'RE','type':'resolution_entropy'},
+    'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
+    'Statistics with different isoform lengths':{'x':'isoform_length','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
+    'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
 }
 transform_options = [
     {'label': 'Linear', 'value': 'linear'},

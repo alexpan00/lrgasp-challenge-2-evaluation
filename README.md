@@ -10,6 +10,33 @@ source base/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+## Input 
+- Gene/isoform annotation: GTF format 
+- Quantification result:
+
+| # Sample | # Methods | Format | Columns                                                                                                                                                                     | Example Data Path          |
+|----------|-----------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
+| Single   | Single    | TSV    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methodA.tsv` |
+| Multiple | Single    | TSV    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methodA.tsv`  |
+| Single   | Multiple  | ZIP    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methods.zip` |
+| Multiple | Multiple  | ZIP    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methods.zip`  |
+\* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
+- Expression ground truth:
+  - TSV format as defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md).
+
+## Output 
+- Report webpage: HTML format
+- Evaluation graphs: PNG and PDF format
+
+| Section                      | Single sample                                                                                                                                                                                                                                                                                                                                                       | Multiple sample with Ground Truth                                                                                                                                                                                                                                                                                                                                                                                     | Multiple sample without Ground Truth                                                                                                                                                                                      |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Gene features                | <ul><b>Plots:</b><li>Distribution of K values</li><li>Distribution of isoform lengths</li><li>Distribution of numbers of exons</li></ul>                                                                                                                                                                                                                            | <ul><b>Plots:</b><li>Distribution of K values</li><li>Distribution of isoform lengths</li><li>Distribution of numbers of exons</li></ul>                                                                                                                                                                                                                                                                              | <ul><b>Plots:</b><li>Distribution of K values</li><li>Distribution of isoform lengths</li><li>Distribution of numbers of exons</li></ul>                                                                                  |
+| Estimation Error             | <ul><b>Tables:</b><li>Normalized Root Mean Square Error</li><li>Median Relative Difference</li><li>Mean Abundance Recovery Rate</li><li>Spearman's rho</li></ul><ul><b>Plots:</b><li>Histogram of Abundance Recovery Rate</li><li>Correlation of estimated abundance and ground truth</li><li>Correlation Boxplot of estimated abundance and ground truth</li></ul> | <ul><b>Tables:</b><li>Normalized Root Mean Square Error</li><li>Median Relative Difference</li><li>Mean Abundance Recovery Rate</li><li>Spearman's rho</li></ul><ul><b>Plots:</b><li>Estimation Error for different conditions</li><li>Histogram of Abundance Recovery Rate</li><li>Correlation of estimated abundance and ground truth</li><li>Correlation Boxplot of estimated abundance and ground truth</li></ul> |                                                                                                                                                                                                                           |
+| Resolution Entropy           | <ul><b>Tables:</b><li>Resolution Entropy</li></ul><ul><b>Plots:</b><li>Resolution Entropy</li></ul>                                                                                                                                                                                                                                                                 | <ul><b>Tables:</b><li>Resolution Entropy</li></ul><ul><b>Plots:</b><li>Resolution Entropy for different conditions</li></ul>                                                                                                                                                                                                                                                                                          | <ul><b>Tables:</b><li>Resolution Entropy</li></ul><ul><b>Plots:</b><li>Resolution Entropy for different conditions</li></ul>                                                                                              |
+| Consistency                  |                                                                                                                                                                                                                                                                                                                                                                     | <ul><b>Tables:</b><li>Consistency Measure</li></ul><ul><b>Plots:</b><li>Consistency Measure curve</li></ul>                                                                                                                                                                                                                                                                                                           | <ul><b>Tables:</b><li>Consistency Measure</li></ul><ul><b>Plots:</b><li>Consistency Measure curve</li></ul>                                                                                                               |
+| Reproducibility              |                                                                                                                                                                                                                                                                                                                                                                     | <ul><b>Tables:</b><li>Reproducibility Measure</li></ul><ul><b>Plots:</b><li>Standard deviation vs estimated abundance curve</li></ul>                                                                                                                                                                                                                                                                                 | <ul><b>Tables:</b><li>Reproducibility Measure</li></ul><ul><b>Plots:</b><li>Standard deviation vs estimated abundance curve</li></ul>                                                                                     |
+| Fold change based evaluation |                                                                                                                                                                                                                                                                                                                                                                     | <ul><b>Tables:</b><li>Precision</li><li>Recall</li><li>Accuracy</li><li>F1 score</li><li>AUC</li></ul><ul><b>Plots:</b><li>ROC curves for performance of quantification</li><li>PR curves for performance of quantification</li></ul>                                                                                                                                                                                 |                                                                                                                                                                                                                           |
+| Split Statistics             | <ul><b>Plots:</b><li>Statistics with different K values</li><li>Statistics with different isoform lengths</li><li>Statistics with different numbers of exons</li><li>Statistics with different expression level</li></ul>                                                                                                                                           | <ul><b>Plots:</b><li>Statistics with different K values</li><li>Statistics with different isoform lengths</li><li>Statistics with different numbers of exons</li><li>Statistics with different expression level</li></ul>                                                                                                                                                                                             | <ul><b>Plots:</b><li>Statistics with different K values</li><li>Statistics with different isoform lengths</li><li>Statistics with different numbers of exons</li><li>Statistics with different expression level</li></ul> |
 ## Usage
 ### Organizer reporter
 ```
@@ -38,31 +65,70 @@ required named arguments:
 ```
 ## Example
 ### Single method evaluation
-Here, to evaluate quantification result for one method,use
+#### Single method Single sample
 ```
 source base/bin/activate
 python encode_quantification/main.py \
 -a chr1.gtf \
--r methodA.tsv \
--t truth.tsv \
+-r singlesample/methodA.tsv \
+-t singlesample/truth.tsv \
+-o reports \
+--num_method Single \
+--num_samples Single
+```
+#### Single method Multiple sample with ground truth
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r multisample/methodA.tsv \
+-t multisample/truth.tsv \
 -o reports \
 --num_method Single \
 --num_samples Multi
 ```
-`MethodA.tsv` is the quantification result and `truth.tsv` is the expression ground truth. Both are in the format defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
-It will generate a `Report.html` in `reports` folder, consisting of different evaluation metrics based on the input. 
-### Multiple methods evaluation
-To evaluate multiple methods quantification results, use
+#### Single method Multiple sample without ground truth
 ```
 source base/bin/activate
 python encode_quantification/main.py \
 -a chr1.gtf \
--r methods.zip \
--t truth.tsv \
+-r multisample/methodA.tsv \
+-o reports \
+--num_method Single \
+--num_samples Multi
+```
+### Multiple methods evaluation
+#### Multiple method Single sample
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r singlesample/methods.zip \
+-t singlesample/truth.tsv \
+-o reports \
+--num_method Multi \
+--num_samples Single
+```
+#### Multiple method Multiple sample with ground truth
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r multisample/methods.zip \
+-t multisample/truth.tsv \
 -o reports \
 --num_method Multi \
 --num_samples Multi
 ```
-Here `methods.zip` packs multiple methods quantification results. Noted each method in the reports will be named based on the given file name in the zip file. 
+#### Multiple method Multiple sample without ground truth
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r multisample/methods.zip \
+-o reports \
+--num_method Multi \
+--num_samples Multi
+```
 ## Example report screenshot
 ![report screenshot](example/screenshot.png)
