@@ -18,7 +18,7 @@ all_sections = [
 ]
 def generate_output(output,output_path):
     des_assets_path = os.path.join(output_path,'assets') 
-    src_assets_dir = 'encode_quantification/report_generator/templates/assets'
+    src_assets_dir = os.path.join(os.path.dirname(__file__),'report_generator/templates/assets')
     for src_dir, dirs, files in os.walk(src_assets_dir):
         dst_dir = src_dir.replace(src_assets_dir, des_assets_path, 1)
         if not os.path.exists(dst_dir):
@@ -47,7 +47,7 @@ def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,
         return dfs,anno_df,method_names
     
 def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,is_multi_method,is_long_read,K_value_selection):
-    env = Environment(loader=FileSystemLoader('encode_quantification/report_generator/templates'),autoescape=select_autoescape(['html']))
+    env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__),'report_generator/templates')),autoescape=select_autoescape(['html']))
     template = env.get_template('base.html')
     sections = [all_sections[0]]
     if (is_multi_method):

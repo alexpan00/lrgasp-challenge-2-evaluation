@@ -36,3 +36,33 @@ required named arguments:
   --num_samples NUM_SAMPLES
                         Whether multi sample data given ['Single' or 'Multi']
 ```
+## Example
+### Single method evaluation
+Here, to evaluate quantification result for one method,use
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r methodA.tsv \
+-t truth.tsv \
+-o reports \
+--num_method Single \
+--num_samples Multi
+```
+`MethodA.tsv` is the quantification result and `truth.tsv` is the expression ground truth. Both are in the format defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
+It will generate a `Report.html` in `reports` folder, consisting of different evaluation metrics based on the input. 
+### Multiple methods evaluation
+To evaluate multiple methods quantification results, use
+```
+source base/bin/activate
+python encode_quantification/main.py \
+-a chr1.gtf \
+-r methods.zip \
+-t truth.tsv \
+-o reports \
+--num_method Multi \
+--num_samples Multi
+```
+Here `methods.zip` packs multiple methods quantification results. Noted each method in the reports will be named based on the given file name in the zip file. 
+## Example report screenshot
+![report screenshot](example/screenshot.png)
