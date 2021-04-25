@@ -1,6 +1,6 @@
 # LRGASP visualization
 ## Requirements
-You should have python 3.6+ and linux installed on your machine
+Running python 3.7 and linux64 on your machine
 ## Install
 ```
 git clone https://github.com/Tidesun/LRGASP_visualization.git
