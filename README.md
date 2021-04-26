@@ -69,10 +69,10 @@ required named arguments:
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r singlesample/methodA.tsv \
--t singlesample/truth.tsv \
--o reports \
+-a example/chr1.gtf \
+-r example/singlesample/methodA.tsv \
+-t example/singlesample/truth.tsv \
+-o example/reports \
 --num_method Single \
 --num_samples Single
 ```
@@ -80,10 +80,10 @@ python encode_quantification/main.py \
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r multisample/methodA.tsv \
--t multisample/truth.tsv \
--o reports \
+-a example/chr1.gtf \
+-r example/multisample/methodA.tsv \
+-t example/multisample/truth.tsv \
+-o example/reports \
 --num_method Single \
 --num_samples Multi
 ```
@@ -91,9 +91,9 @@ python encode_quantification/main.py \
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r multisample/methodA.tsv \
--o reports \
+-a example/chr1.gtf \
+-r example/multisample/methodA.tsv \
+-o example/reports \
 --num_method Single \
 --num_samples Multi
 ```
@@ -102,10 +102,10 @@ python encode_quantification/main.py \
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r singlesample/methods.zip \
--t singlesample/truth.tsv \
--o reports \
+-a example/chr1.gtf \
+-r example/singlesample/methods.zip \
+-t example/singlesample/truth.tsv \
+-o example/reports \
 --num_method Multi \
 --num_samples Single
 ```
@@ -113,10 +113,10 @@ python encode_quantification/main.py \
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r multisample/methods.zip \
--t multisample/truth.tsv \
--o reports \
+-a example/chr1.gtf \
+-r example/multisample/methods.zip \
+-t example/multisample/truth.tsv \
+-o example/reports \
 --num_method Multi \
 --num_samples Multi
 ```
@@ -124,9 +124,9 @@ python encode_quantification/main.py \
 ```
 source base/bin/activate
 python encode_quantification/main.py \
--a chr1.gtf \
--r multisample/methods.zip \
--o reports \
+-a example/chr1.gtf \
+-r example/multisample/methods.zip \
+-o example/reports \
 --num_method Multi \
 --num_samples Multi
 ```

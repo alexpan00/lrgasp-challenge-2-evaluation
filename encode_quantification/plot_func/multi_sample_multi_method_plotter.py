@@ -53,7 +53,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
-            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
+            [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,y_axis_column_names)
             cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] in ['nrmse','mrd','spearmanr']]
             cond2_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] in ['nrmse','mrd','spearmanr']]
             col_num = len(cond1_metric_dicts)
