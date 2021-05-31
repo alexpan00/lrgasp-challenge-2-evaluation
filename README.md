@@ -56,14 +56,22 @@ required named arguments:
                         The path of annotation file [GTF]
   -r RESULT, --result RESULT
                         The path of quantification result file [TSV\ZIP]
-  -t TRUTH, --truth TRUTH
-                        The path of true expression file [TSV]
   -o OUTPUT, --output OUTPUT
                         The path of output directory
   --num_method NUM_METHOD
                         Whether multi method data given ['Single' or 'Multi']
   --num_samples NUM_SAMPLES
                         Whether multi sample data given ['Single' or 'Multi']
+
+optional arguments:
+  -t TRUTH, --truth TRUTH
+                        The path of true expression file [TSV]
+  --seq SEQ             Whether long read data given ['LongRead' or
+                        'ShortRead'] [default:LongRead]
+  --K_value_selection K_VALUE_SELECTION
+                        Which K value calculation['Condition_number','K_value'
+                        ,'Generalized_condition_number']
+                        [default:Condition_number]
 ```
 ## Example
 ### Single method evaluation
