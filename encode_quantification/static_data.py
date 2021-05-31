@@ -180,7 +180,13 @@ filter_options = [
     {'label': 'K value < 1', 'value': 'k<1'},
 ]
 
-K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,11)]
+annot_options = [
+    {'label':'lrgasp_gencode_v38_sirvs(human)','value':'human'},
+    {'label':'lrgasp_gencode_vM27_sirvs(mouse)','value':'mouse'},
+    {'label':'Ensembl_Homo_sapiens.GRCh38.104.chr(human)','value':'ensembl_human'},
+]
+# K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,11)]
+K_value_ranges = [i/10 for i in range(11)]
 condition_number_ranges = [i*2.5 for i in range(10)] + [i*25 for i in range(1,21,2)]
 generalized_condition_number_ranges = [i for i in range(11)] + [i*25 for i in range(1,11)]
 ARR_ranges = [i/10 for i in range(11)]

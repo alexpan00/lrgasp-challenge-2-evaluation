@@ -16,10 +16,12 @@ pip install -r requirements.txt
 
 | # Sample | # Methods | Format | Columns                                                                                                                                                                     | Example Data Path          |
 |----------|-----------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
-| Single   | Single    | TSV    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methodA.tsv` |
-| Multiple | Single    | TSV    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methodA.tsv`  |
-| Single   | Multiple  | ZIP    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methods.zip` |
-| Multiple | Multiple  | ZIP    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methods.zip`  |
+| Single| Single    | TSV    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methodA.tsv` |
+|Multiple| Single    | TSV    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methodA.tsv`  |
+|Single| Multiple  | ZIP    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methods.zip` |
+|Multiple| Multiple  | ZIP    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methods.zip`  |
+
+
 \* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
 - Expression ground truth:
   - TSV format as defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md).

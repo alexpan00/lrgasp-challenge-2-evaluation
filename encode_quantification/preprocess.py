@@ -4,17 +4,18 @@ import pandas as pd
 import numpy as np
 import time
 import zipfile
+import pickle
 from app import cache
 from library.k_values.main import get_kvalues_dict
 from preprocess_util import *
-
+@cache.memoize()
 def load_data(contents):
     return pd.read_csv(contents[0], sep='\t',header=None,skiprows=1, comment='#')
     # content_type, content_string = contents.split(',')
     # decoded = base64.b64decode(content_string)
     # df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t',header=None)
     # return df
-    
+@cache.memoize()  
 def load_zipped_data(contents):
     if 'zip' in contents[0]:
         list_of_df = []
@@ -27,14 +28,25 @@ def load_zipped_data(contents):
                     method_names.append(path.split('.')[0])
         return list_of_df,method_names
 
-
+@cache.memoize()
 def load_annotation(contents,is_long_read=True,K_value_selection='Condition_number'):
-    with open(contents[0],'r') as f:
-        return get_kvalues_dict(io.StringIO(f.read()),is_long_read,K_value_selection)
+    path = 'encode_quantification/library/k_value_dicts/'
+    if contents[0] == 'human':
+        with open('{}/lrgasp_gencode_v38_sirvs.pkl'.format(path),'rb') as f:
+            return pickle.load(f)
+    elif contents[0] == 'mouse':
+        with open('{}/lrgasp_gencode_vM27_sirvs.pkl'.format(path),'rb') as f:
+            return pickle.load(f)
+    elif contents[0] == 'ensembl_human':
+            with open('{}/Homo_sapiens.GRCh38.104.chr.pkl'.format(path),'rb') as f:
+                return pickle.load(f)
+    else:
+        with open(contents[0],'r') as f:
+            return get_kvalues_dict(io.StringIO(f.read()),is_long_read,K_value_selection)
     # content_type, content_string = contents.split(',')
     # decoded = base64.b64decode(content_string)
     # return io.StringIO(decoded.decode('utf-8'))
-
+@cache.memoize()
 def preprocess_single_sample(list_of_contents,replicate_column,is_long_read=True,K_value_selection='Condition_number'):
     estimated_df = load_data(list_of_contents[0]).set_index(0)[[replicate_column]]
     estimated_df.index.name = 'isoform'
@@ -53,7 +65,7 @@ def preprocess_single_sample(list_of_contents,replicate_column,is_long_read=True
     df = preprocess_single_sample_util(df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict)
     return df,anno_df
 
-
+@cache.memoize()
 def preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given,is_long_read=True,K_value_selection='Condition_number'):
 
     estimated_df = load_data(list_of_contents[0]).set_index(0)
@@ -73,7 +85,7 @@ def preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given,i
     df = preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict)
     
     return df,anno_df
-
+@cache.memoize()
 def preprocess_single_sample_multi_method(list_of_contents,replicate_column,is_long_read=True,K_value_selection='Condition_number'):
     estimated_dfs,method_names = load_zipped_data(list_of_contents[0])
     kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict  = load_annotation(list_of_contents[1],is_long_read,K_value_selection)
@@ -94,7 +106,7 @@ def preprocess_single_sample_multi_method(list_of_contents,replicate_column,is_l
     anno_df.index.name = 'isoform'
     anno_df = anno_df.reset_index()
     return dfs,anno_df,method_names
-
+@cache.memoize()
 def preprocess_multi_sample_multi_method(list_of_contents,ground_truth_given,is_long_read=True,K_value_selection='Condition_number'):
     estimated_dfs,method_names = load_zipped_data(list_of_contents[0])
     kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict  = load_annotation(list_of_contents[1],is_long_read,K_value_selection)

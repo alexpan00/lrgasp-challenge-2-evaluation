@@ -111,18 +111,20 @@ def on_upload_file(contents):
 
 @app.callback([Output('error_prompt', 'children'),Output('on_data_load', 'children')],Input('confirm_data','n_clicks'),
 [State({'type': "upload_file", 'index': ALL}, 'children'),
+State('annotation_option','value'),
 State('data_sample_option','value'),
 State('ground_truth_given','value'),
 State('multi_methods_option','value'),
 State("replicate_column_selector",'value')])
-def on_data_load(n_clicks, list_of_contents,data_sample_option,ground_truth_given_val,multi_methods_option,replicate_column):
+def on_data_load(n_clicks, list_of_contents,annotation_option,data_sample_option,ground_truth_given_val,multi_methods_option,replicate_column):
     if (n_clicks == 0):
         raise PreventUpdate
+    list_of_contents.insert(2, [annotation_option])
     list_of_contents = [c for c in list_of_contents[0:2] if c is not None] + list_of_contents[2:]
     if (list_of_contents[0] is None):
         return 'No quantification result is uploaded!',None
-    if (list_of_contents[1] is None):
-        return 'No annotation is uploaded!',None
+    if (annotation_option is None):
+        return 'No annotation is selected!',None
     if (((ground_truth_given_val == 'No') or (list_of_contents[2] is None)) and (data_sample_option == 'single_sample')):
         return 'Single sample data selected and no true expression data is uploaded. No available analysis!',None
     if ((ground_truth_given_val == 'Yes') and (list_of_contents[2] is None)):

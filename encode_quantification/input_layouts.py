@@ -3,7 +3,7 @@ import uuid
 import dash_uploader as du
 import dash_core_components as dcc
 import dash_html_components as html
-from static_data import filter_options, data_sample_options,multi_methods_options
+from static_data import annot_options,filter_options, data_sample_options,multi_methods_options
 upload_style = {
     'width': '100%',
     'height': '40px',
@@ -49,24 +49,27 @@ input_layout = html.Div(children=[
                 #     style=upload_style,
                 # ),
     html.Div(id='replicate_column_selector_div',children=[dcc.Input(id='replicate_column_selector',style={'display':'none'})]),
-    html.Div(["Annotation",
-                du.Upload(
-                    id={'type': "du_uploader", 'index': 4},
-                     text = 'Drag and Drop or Click here to select a file',
-                    max_file_size=1800,
-                    filetypes=['gtf'],
-                    upload_id=uuid.uuid1(),
-                ),
-                html.Div(id={'type': "upload_file", 'index':4},style={'display':'none'}),
-                # dcc.Upload(
-                #     id={'type': "upload_file", 'index': 2},
-                #     children=html.Div([
-                #         'Drag and Drop or ',
-                #         html.A('Select a file')
-                #     ]),
-                #     style=upload_style,
-                # ),
-                html.Div(id={'type': "file_preview", 'index': 4})]),
+    html.Div(['Annotation',
+    dcc.Dropdown(
+                options=annot_options, id='annotation_option', value='lrgasp_gencode_v38_sirvs(human)')]),
+    # html.Div(["Annotation",
+    #             du.Upload(
+    #                 id={'type': "du_uploader", 'index': 4},
+    #                  text = 'Drag and Drop or Click here to select a file',
+    #                 max_file_size=1800,
+    #                 filetypes=['gtf'],
+    #                 upload_id=uuid.uuid1(),
+    #             ),
+    #             html.Div(id={'type': "upload_file", 'index':4},style={'display':'none'}),
+    #             # dcc.Upload(
+    #             #     id={'type': "upload_file", 'index': 2},
+    #             #     children=html.Div([
+    #             #         'Drag and Drop or ',
+    #             #         html.A('Select a file')
+    #             #     ]),
+    #             #     style=upload_style,
+    #             # ),
+    #             html.Div(id={'type': "file_preview", 'index': 4})]),
 
     html.Label(["Ground truth is given",
                 dcc.RadioItems(

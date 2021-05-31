@@ -13,10 +13,12 @@ from static_data import *
     State('multi_methods_option','value'),
      State('ground_truth_given', 'value'),
      State({'type': "upload_file", 'index': ALL}, 'children'),
+     State('annotation_option','value'),
      State("replicate_column_selector", 'value')])
-def update_table(on_data_load, data_sample_option, multi_methods_option,ground_truth_given_val, list_of_contents, replicate_column):
+def update_table(on_data_load, data_sample_option, multi_methods_option,ground_truth_given_val, list_of_contents, annotation_option,replicate_column):
     if (on_data_load is None):
         raise PreventUpdate
+    list_of_contents.insert(2, [annotation_option])
     list_of_contents = [c for c in list_of_contents[0:2] if c is not None] + list_of_contents[2:]
     ground_truth_given = True if ground_truth_given_val == 'Yes' else False
     data, columns = [],[]

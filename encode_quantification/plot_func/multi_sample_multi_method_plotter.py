@@ -285,7 +285,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         violin_specs = [[{"type": "violin", "colspan": figure_cols}]+[None for i in range(line_figure_cols-1)] for i in range(len(violin_column_names))]
         line_specs = [[{"type": "scatter"} for i in range(line_figure_cols)] for j in range(line_figure_rows)]
         ranges,max_threshold = prepare_ranges(self.plot_dfs[0],x_axis_column_name)
-        fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.1, horizontal_spacing=0.1,specs=violin_specs+line_specs)
+        fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.05, horizontal_spacing=0.1,specs=violin_specs+line_specs)
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
             plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name,ranges,max_threshold)
@@ -344,8 +344,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             violingap=0,
             violingroupgap=0,
             # legend=dict(yanchor="top",y=0.1, xanchor="right",x=0.6),
-            width=fig_size['rec']['width']*figure_cols,
-            height=fig_size['rec']['height']*figure_rows,template= themes['large_multi'])
+            width=fig_size['small_rec']['width']*figure_cols,
+            height=fig_size['small_rec']['height']*figure_rows,template= themes['large_multi'])
         
         return fig
     def plot(self,plot_figure_name,scale,ground_truth_given):

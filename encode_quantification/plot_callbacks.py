@@ -52,19 +52,21 @@ def update_options(n_clicks, data_sample_option, ground_truth_given):
      State('scale', 'value'),
      State('plot_tabs', 'children'),
      State({'type': "upload_file", 'index': ALL}, 'children'),
+     State('annotation_option','value'),
      State('data_sample_option', 'value'),
      State('multi_methods_option','value'),
      State("replicate_column_selector", 'value')])
-def update_graph(n_clicks, on_data_load, ground_truth_given_val,plot_figure_name, scale,plot_tabs_children, list_of_contents, data_sample_option,multi_methods_option, replicate_column):
+def update_graph(n_clicks, on_data_load, ground_truth_given_val,plot_figure_name, scale,plot_tabs_children, list_of_contents,annotation_option, data_sample_option,multi_methods_option, replicate_column):
     if ((n_clicks == 0) | (on_data_load is None)):
         raise PreventUpdate
+    list_of_contents.insert(2, [annotation_option])
     list_of_contents = [c for c in list_of_contents[0:2] if c is not None] + list_of_contents[2:]
     ground_truth_given = True if ground_truth_given_val == 'Yes' else False
     if (multi_methods_option=='single_method'):
         if (data_sample_option == 'single_sample'):
             plot_df,anno_df = preprocess_single_sample(
                 list_of_contents, replicate_column)
-            plotter = Single_sample_plotter(plot_df)
+            plotter = Single_sample_plotter(plot_df,anno_df)
             fig = plotter.plot(plot_figure_name,scale)
         elif (data_sample_option == 'multi_sample_diff_condition'):
             plot_df,anno_df = preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given)
@@ -74,12 +76,12 @@ def update_graph(n_clicks, on_data_load, ground_truth_given_val,plot_figure_name
         if (data_sample_option == 'single_sample'):
             plot_dfs,anno_df,method_names = preprocess_single_sample_multi_method(
                 list_of_contents, replicate_column)
-            plotter = Single_sample_multi_method_plotter(plot_dfs,method_names)
+            plotter = Single_sample_multi_method_plotter(plot_dfs,anno_df,method_names)
             fig = plotter.plot(plot_figure_name,scale)
         elif (data_sample_option == 'multi_sample_diff_condition'):
             plot_dfs,anno_df,method_names = preprocess_multi_sample_multi_method(
                 list_of_contents, ground_truth_given)
-            plotter = Multi_sample_multi_method_plotter(plot_dfs,method_names)
+            plotter = Multi_sample_multi_method_plotter(plot_dfs,anno_df,method_names)
             fig = plotter.plot(plot_figure_name,scale,ground_truth_given)
     fig.update_xaxes(exponentformat='e',automargin=True)
     fig.update_yaxes(exponentformat='e',automargin=True)

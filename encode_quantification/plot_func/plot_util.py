@@ -62,9 +62,9 @@ def filter_by_scale(scale, plot_df):
     return plot_df
 
 def get_k_val_dist(plot_df,groupby):
-    if (plot_df[groupby].median()>np.median(generalized_condition_number_ranges)):
+    if (plot_df[groupby].median()>np.median(condition_number_ranges)):
         ranges = condition_number_ranges
-    elif (plot_df[groupby].median()>np.median(K_value_ranges)):
+    elif (plot_df[groupby].median()>np.median(generalized_condition_number_ranges)):
         ranges = generalized_condition_number_ranges
     else:
         ranges = K_value_ranges
@@ -121,6 +121,7 @@ def get_group_range(plot_df, groupby):
                     # vals.append(float(val[2:]))
                     vals.append(float('inf'))
             return pd.Series(vals)
+        return plot_df,custom_sort
     elif groupby == 'arr':
         def custom_sort(col, ranges):
             vals = []
@@ -138,6 +139,7 @@ def get_group_range(plot_df, groupby):
         plot_df.loc[plot_df[groupby] <= ranges[1],
                     'group_range'] = '<={:.0%}'.format(ranges[1])
         plot_df = plot_df.dropna()
+        return plot_df,custom_sort
     elif groupby in ['ave_true_abund','log2_true_abund']:
         def custom_sort(col):
             vals = []
@@ -149,12 +151,15 @@ def get_group_range(plot_df, groupby):
                     vals.append(float('inf'))
             return pd.Series(vals)
         n_bins = 6
+        plot_df = plot_df[plot_df[groupby] >= 0]
         max_threshold = np.percentile(plot_df[groupby], 99)
-        categories =  pd.cut(plot_df[groupby][plot_df[groupby]<max_threshold], bins=n_bins-1).cat.categories
+        cutted =  pd.cut(plot_df[groupby][plot_df[groupby]<max_threshold], bins=n_bins-1)
+        categories = cutted.cat.categories
+        plot_df.loc[plot_df[groupby]<max_threshold, 'group_range'] = cutted.astype('str')
+        plot_df.loc[plot_df[groupby]<=categories[0].right+0.001, 'group_range'] = '[0, {}]'.format(categories[0].right)
 
-        plot_df.loc[plot_df[groupby]<max_threshold, 'group_range'] = pd.cut(plot_df[groupby][plot_df[groupby]<max_threshold], bins=n_bins-1,include_lowest=True).astype('str')
-        plot_df.loc[plot_df[groupby]<=categories[0].right, 'group_range'] = '[0, {}]'.format(categories[0].right)
-        plot_df.loc[plot_df[groupby]>categories[-1].right, 'group_range'] = '>{:3f}'.format(categories[-1].right)
+        plot_df.loc[plot_df[groupby]>categories[-1].right - 0.001, 'group_range'] = '>{:.3f}'.format(categories[-1].right)
+        return plot_df,custom_sort
     elif groupby in ['isoform_length']:
         def custom_sort(col):
             vals = []
@@ -166,6 +171,7 @@ def get_group_range(plot_df, groupby):
                     vals.append(float('inf'))
             return pd.Series(vals)
         plot_df[groupby] = plot_df[groupby].astype(int)
+        plot_df = plot_df.dropna()
         if plot_df[groupby].max() > 3000:
             max_threshold = 4000
             lower, higher = int(plot_df[groupby].min()), 4000
@@ -210,7 +216,7 @@ def get_group_range(plot_df, groupby):
             temp_df, bins=edges).astype('str')
         plot_df.loc[plot_df[groupby] > max_threshold,
                     'group_range'] = '>{}'.format(max_threshold)
-    return plot_df, custom_sort
+        return plot_df, custom_sort
 def get_density(x,y):
     from scipy.stats import gaussian_kde
     xy = np.vstack([x,y])
