@@ -23,6 +23,7 @@ pip install -r requirements.txt
 
 
 \* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
+\* Multiple methods result files should be named as the method name and the output will be named accordingly.
 - Expression ground truth:
   - TSV format as defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md).
 
