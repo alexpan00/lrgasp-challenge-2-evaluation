@@ -11,15 +11,16 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 ## Input 
-- Gene/isoform annotation: GTF format 
+- Gene/isoform annotation: GTF format
+    - Human and Mouse reference annoation with spike-in at [Link](https://lrgasp.github.io/lrgasp-submissions/docs/reference-genomes.html#transcriptome-references)
 - Quantification result:
 
 | # Sample | # Methods | Format | Columns                                                                                                                                                                     | Example Data Path          |
 |----------|-----------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
 | Single| Single    | TSV    | <b>First column:</b> ID<br><b>Second column:</b> Quanficiation result for single sample                                                                                                   | [single sample data](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/singlesample/methodA.tsv) |
-|Multiple| Single    | TSV    | <b>First column:</b> ID<br><b>Next N columns:<br>  <li>[2,N/2 + 1] columns:</b> Quantification result under condition A</li>  <li><b>[N/2 + 2,N + 1] columns:</b> Quantification result under condition B</li> | [multiple samples data](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methodA.tsv)  |
+|Multiple| Single    | TSV    | <b>First column:</b> ID<br><b>Next N columns:</b> Quantification results for multiple samples | [multiple samples data](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methodA.tsv)  |
 |Single| Multiple  | ZIP    | <b>First column:</b> ID<br><b>Second column:</b> Quanficiation result for single sample                                                                                                   | [multiple methods with single sample](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/singlesample/methods.zip) |
-|Multiple| Multiple  | ZIP    | <b>First column:</b> ID<br><b>Next N columns:<br>   <li>[2,N/2 + 1] columns:</b> Quantification result under condition A</li>   <li><b>[N/2 + 2,N + 1] columns:</b> Quantification result under condition B</li> | [multiple methods with multiple samples](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methods.zip)  |
+|Multiple| Multiple  | ZIP    | <b>First column:</b> ID<br><b>Next N columns:</b> Quantification results for multiple samples  | [multiple methods with multiple samples](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methods.zip)  |
 
 
 \* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)    
