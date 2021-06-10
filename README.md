@@ -1,4 +1,7 @@
 # LRGASP visualization
+## Web application
+We have a web application that illustrates the evaluation plots and functions [here](https://lrrna-seq-quantification.org).<br>
+For a live video demo of this web app, you can check [here](https://youtu.be/y02MI8ZyF-E).
 ## Requirements
 Running python 3.7 and linux64 on your machine
 ## Install
