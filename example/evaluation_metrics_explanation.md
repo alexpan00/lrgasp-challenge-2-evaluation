@@ -1,5 +1,8 @@
 # How the evaluation metrics works
-## Spearman' rho
+## Spearman Correlation Coefficient (SCC)
+SCC evaluates the monotonic relationship between the estimation and gold standard, which is based on the rank for gene isoform abundance rather than the raw data. It is computed as<br>
+![Eeq](https://latex-staging.easygenerator.com/gif.latex?SC%7B%7BC%7D_%7B%5CTheta%20%2C%5Chat%7B%5CTheta%20%7D%7D%7D%3D%5Cfrac%7B%5Coperatorname%7Bcov%7D%5Cleft%28%20r%7B%7Bg%7D_%7B%5CTheta%20%7D%7D%2Cr%7B%7Bg%7D_%7B%7B%5Chat%7B%5CTheta%20%7D%7D%7D%7D%20%5Cright%29%7D%7B%7B%7Bs%7D_%7Br%7B%7Bg%7D_%7B%5CTheta%20%7D%7D%7D%7D%5Ccdot%20%7B%7Bs%7D_%7Br%7B%7Bg%7D_%7B%7B%5Chat%7B%5CTheta%20%7D%7D%7D%7D%7D%7D%7D)<br>
+where ![Eq](https://latex-staging.easygenerator.com/gif.latex?r%7B%7Bg%7D_%7B%5CTheta%20%7D%7D) and ![Eq](https://latex-staging.easygenerator.com/gif.latex?r%7B%7Bg%7D_%7B%7B%5Chat%7B%5CTheta%20%7D%7D%7D%7D) are the ranks of ![Eq](https://latex-staging.easygenerator.com/gif.latex?%7B%5CTheta%20%7D) and ![Eq](https://latex-staging.easygenerator.com/gif.latex?%7B%5Chat%7B%5CTheta%20%7D%7D), respectively, and ![formula](https://latex-staging.easygenerator.com/gif.latex?%7B%5Coperatorname%7Bcov%7D%5Cleft%28%20r%7B%7Bg%7D_%7B%5CTheta%20%7D%7D%2Cr%7B%7Bg%7D_%7B%7B%5Chat%7B%5CTheta%20%7D%7D%7D%7D%20%5Cright%29%7D) is the covariance of the rank variables,![Eq](https://latex-staging.easygenerator.com/gif.latex?%7B%7Bs%7D_%7Br%7B%7Bg%7D_%7B%5CTheta%20%7D%7D%7D%7D)  and ![Eq](https://latex-staging.easygenerator.com/gif.latex?%7Bs%7D_%7Br%7B%7Bg%7D_%7B%7B%5Chat%7B%5CTheta%20%7D%7D%7D%7D%7D) are the sample standard deviations of  and , respectively.<br>
 ![Spearman' rho](figures/spearman_correlation.png)<br>
 Spearman Correlation Coefficient (SCC) between the estimation and gold standard. The SCC reveals gene CDY1 can be accurately quantified but not gene METTL9.
 ## Reproducibility
