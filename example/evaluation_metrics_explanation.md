@@ -18,7 +18,9 @@ Normalized Root Mean Square Error (NRMSE) gives a measure of the extent to which
 ![Eq](https://latex-staging.easygenerator.com/gif.latex?NRMSE%3D%5Cfrac%7B%5Csqrt%7B%5Cfrac%7B1%7D%7BI%7D%5Csum%5Climits_%7Bi%3D1%7D%5E%7BI%7D%7B%7B%7B%5Cleft%28%20%7B%7B%5Ctheta%20%7D_%7Bi%7D%7D-%7B%7B%7B%5Chat%7B%5Ctheta%20%7D%7D%7D_%7Bi%7D%7D%20%5Cright%29%7D%5E%7B2%7D%7D%7D%7D%7D%7B%7B%7Bs%7D_%7B%5CTheta%20%7D%7D%7D)<br>
 where ![Eq](https://latex.codecogs.com/gif.latex?s_%7B%5CTheta%7D) is the sample standard deviation of ![Eq](https://latex.codecogs.com/gif.latex?%5CTheta). A good performance of abundance estimation should have a small value of NRMSE.
 Since quantification performance could be influenced by the exon-isoform structure and the abundance, we evaluate the quantification of different sets of genes/transcripts with different isoform features, including isoform numbers, exon numbers, gold standard abundance values and a customized  statistic  K-value representing the complexity of exon-isoform structures.
-
+## K-value
+![K-value](figures/K-value.png)<br>
+K-value is the condition number of the exon-isoform binary matrix, which can be used to measure the complexity of exon-isoform structures for each gene.
 ## Reproducibility
 ![Reproducibility](figures/reproducibility.png)<br>
 By fitting the standard deviation versus average isoform abundance into a smooth curve, it can be shown that Method B has a lower standard deviation and higher reproducibility.
