@@ -3,14 +3,14 @@ from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd
 import math
-
+import pickle
 from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
 from preprocess_util import *
 from plot_func.plot_util_multi_method import *
 from plot_func.multi_method_plotter import Multi_method_plotter
 class Single_sample_multi_method_plotter(Multi_method_plotter):
-    def __init__(self,plot_dfs,anno_df,method_names):
-        Multi_method_plotter.__init__(self,plot_dfs,anno_df,method_names)
+    def __init__(self,plot_dfs,anno_df,method_names,output_path):
+        Multi_method_plotter.__init__(self,plot_dfs,anno_df,method_names,output_path)
     def plot_dist(self,x_axis_column_name, scale):
         return Multi_method_plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name,scale):
@@ -90,6 +90,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
         # figure_cols = math.ceil(len(y_axis_column_names)/ figure_rows)
         fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.25, horizontal_spacing=0.1)
         ranges,max_threshold = prepare_ranges(self.plot_dfs[0],x_axis_column_name)
+        f = open('{}/plot.pkl'.format(self.output_path),'ab')
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
             plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name,ranges,max_threshold)
@@ -103,10 +104,10 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
 
                 if ((y_axis_column_name in ['mrd']) & (x_axis_column_name=='K_value')):
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: get_single_sample_metric(
-                        y_axis_column_name, df['true_abund'], df['estimated_abund'],plot_df,True)).to_frame().reset_index()
+                        y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
                 else:
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: get_single_sample_metric(
-                        y_axis_column_name, df['true_abund'], df['estimated_abund'],plot_df)).to_frame().reset_index()
+                        y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
                 group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                     by=['group_range'], key=lambda col: custom_sort(col))
                 if (y_axis_column_name in 'nrmse'):
@@ -117,12 +118,14 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
                 else:
                     fig.add_trace(go.Scatter(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         mode='lines+markers', name='{}'.format(method_name),marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
+                pickle.dump([method_name, x_axis_column_name,group_series],f)
                 fig.update_xaxes(
                     title_text=on_plot_shown_label[x_axis_column_name],tickangle = 45, row=row_num, col=col_num)
                 fig.update_yaxes(
                     title_text=on_plot_shown_label[y_axis_column_name], row=row_num, col=col_num)
                 if (y_axis_column_name=='nrmse'):
                     fig.update_yaxes(title_text='Log2(NRMSE+1)', row=row_num, col=col_num)
+        f.close()
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             autosize=False,
@@ -146,7 +149,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
         shared_bins_cond = None
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
-            plot_df = plot_df[(np.log2(plot_df[x_axis_column_name]+1) >=1) &  (np.log2(plot_df[y_axis_column_name]+1) >= 1)]
+            # plot_df = plot_df[(np.log2(plot_df[x_axis_column_name]+1) >=1) &  (np.log2(plot_df[y_axis_column_name]+1) >= 1)]
             df,shared_bins_cond = prepare_corr_box_plot_data(np.log2(plot_df[y_axis_column_name]+1),np.log2(plot_df[x_axis_column_name]+1),shared_bins_cond)
             fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund'],name=method_name),col=1,row=1)
         fig.update_xaxes(title_text='Log2(True abundance+1)')
@@ -161,7 +164,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_dist(x_axis_column_name, scale)
         elif plot_figure_name == 'Histogram of Abundance Recovery Rate':
             fig = self.plot_arr(x_axis_column_name, scale)
-        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different expression level']:
+        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different numbers of isoforms','Statistics with different expression level']:
             fig = self.plot_grouped_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)

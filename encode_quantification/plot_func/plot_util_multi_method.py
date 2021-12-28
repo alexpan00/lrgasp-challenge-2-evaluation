@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
+from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes,K_value_ranges,condition_number_ranges
 from preprocess_util import *
 
 def filter_by_scale(scale, plot_df):
@@ -33,11 +33,15 @@ def prepare_ranges(plot_df,groupby):
         # qcutted_str[qcutted_str == str(categories[-1])] = '({}, 1)'.format(categories[-1].left)
         # plot_df.loc[plot_df[groupby]<1, 'group_range'] = qcutted_str
         # plot_df.loc[plot_df[groupby]>=1, 'group_range'] = '>= 1'
-        if (len(plot_df[groupby].unique())<9):
-            n_bins = len(plot_df[groupby].unique())
-        else:
-            n_bins = 9
-        qcutted,categories = pd.qcut(plot_df[groupby],n_bins ,duplicates='drop',retbins=True)
+        ranges = condition_number_ranges
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        categories = cutted.cat.categories
+        plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
+        # plot_df.loc[plot_df[groupby] < ranges[0],
+        #             'group_range'] = '<{}'.format(ranges[0])
         def custom_sort(col):
             vals = []
             for val in col.tolist():
@@ -78,6 +82,29 @@ def prepare_ranges(plot_df,groupby):
         cutted,categories = pd.cut(
             plot_df.loc[plot_df[groupby] <= max_threshold, groupby], bins=edges,include_lowest=True,retbins=True)
         return categories,max_threshold
+    elif groupby in ['num_exons','num_isoforms']:
+        def custom_sort(col):
+            vals = []
+            for val in col.tolist():
+                if ',' in val:
+                    vals.append(float(val.split(',')[1][1:-1]))
+                else:
+                    # vals.append(float(val[1:]))
+                    vals.append(float('inf'))
+            return pd.Series(vals)
+        if groupby == 'num_exons':
+            ranges = num_exons_range
+        else:
+            ranges = num_isoforms_range
+        cutted = pd.cut(
+        plot_df[groupby], ranges, right=False)
+        categories = cutted.cat.categories
+        plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
+        plot_df.loc[plot_df[groupby] >= ranges[-1],
+                    'group_range'] = '>={}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(
+            categories[0]), 'group_range'] = '[{}, {})'.format(int(ranges[0]), int(categories[0].right))
+        return categories, ranges[-1]
     else:
         plot_df[groupby] = plot_df[groupby].astype(int)
         max_threshold = np.ceil(np.percentile(plot_df[groupby], 90))
@@ -117,13 +144,16 @@ def get_group_range(plot_df, groupby,ranges,max_threshold):
         # qcutted_str[(qcutted_str == str(categories[-1]))|(qcutted_str=='nan')] = '({}, 1)'.format(categories[-1].left)
         # plot_df.loc[plot_df[groupby]<1, 'group_range'] = qcutted_str
         # plot_df.loc[plot_df[groupby]>=1, 'group_range'] = '>= 1'
-
-        qcutted = pd.cut(plot_df[groupby], bins=ranges)
-        categories = qcutted.cat.categories
-        qcutted_str = qcutted.astype(str)
+        ranges = condition_number_ranges
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        categories = cutted.cat.categories
+        plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
         # qcutted_str[qcutted_str == str(categories[0])] = '(1, {}]'.format(categories[0].right)
-        qcutted_str[qcutted_str == str(categories[-1])] = '>{}'.format(categories[-1].left)
-        plot_df['group_range'] = qcutted_str
+        # qcutted_str[qcutted_str == str(categories[-1])] = '>{}'.format(categories[-1].left)
+        # plot_df['group_range'] = qcutted_str
         plot_df = plot_df[plot_df['group_range']!='nan']
         def custom_sort(col):
             vals = []
@@ -151,6 +181,29 @@ def get_group_range(plot_df, groupby,ranges,max_threshold):
         plot_df.loc[plot_df[groupby] <= ranges[1],
                     'group_range'] = '<={:.0%}'.format(ranges[1])
         plot_df = plot_df.dropna()
+    elif groupby in ['num_exons','num_isoforms']:
+        def custom_sort(col):
+            vals = []
+            for val in col.tolist():
+                if ',' in val:
+                    vals.append(float(val.split(',')[1][1:-1]))
+                else:
+                    # vals.append(float(val[1:]))
+                    vals.append(float('inf'))
+            return pd.Series(vals)
+        if groupby == 'num_exons':
+            ranges = num_exons_range
+        else:
+            ranges = num_isoforms_range
+        cutted = pd.cut(
+        plot_df[groupby], ranges, right=False)
+        categories = cutted.cat.categories
+        plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
+        plot_df.loc[plot_df[groupby] >= ranges[-1],
+                    'group_range'] = '>={}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(
+            categories[0]), 'group_range'] = '[{}, {})'.format(int(ranges[0]), int(categories[0].right))
+        return plot_df, custom_sort
     else:
         def custom_sort(col):
             vals = []

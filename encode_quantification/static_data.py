@@ -16,7 +16,10 @@ color_schemes =["#C0504D",
 			"#E88471",	
             "#009392",
             "#333333",
-            "#045275",]
+            "#045275",
+            "#880e4f",
+            "#c51162",
+            "#b71c1c","#ea80fc","#aa00ff","#64dd17"]
 fig_size = {
     'small_rec':{'width':270,'height':540},
     'rec':{'width':960,'height':540},
@@ -55,6 +58,7 @@ on_plot_shown_label = {
     'ave_estimated_abund':'Log2(Esimated abundance+1)',
     'ave_true_abund':'Log2(True abundance+1)',
     'num_exons': '# of exons',
+    'num_isoforms': '# of isoforms',
     'K_value': 'K value',
     'mean_arr':'Mean ARR'
 }
@@ -84,11 +88,11 @@ on_plot_shown_label = {
 # }
 data_sample_options = [
     {'label': 'Single sample', 'value': 'single_sample'},
-    {'label': 'Multiple sample under different condition', 'value': 'multi_sample_diff_condition'}]
+    {'label': 'Multiple samples data under different condition', 'value': 'multi_sample_diff_condition'}]
         # {'label': 'Multiple sample under same condition', 'value': 'multi_sample_same_condition'}
 multi_methods_options = [
     {'label': 'Single method', 'value': 'single_method'},
-    {'label': 'Multiple method', 'value': 'multi_method'}]
+    {'label': 'Multiple methods', 'value': 'multi_method'}]
 single_sample_table_metrics = [
     {'name': 'Normalized Root Mean Square Error', 'id': 'nrmse','type':'numeric','format':{'specifier':'.3f'},},
     {'name': 'Median Relative Difference', 'id': 'mrd','type':'numeric','format':{'specifier':'.3f'}},
@@ -124,6 +128,7 @@ single_sample_plot_figures = {
     'Distribution of K values':{'x':'K_value','y':'dist','type':'gene_features'},
     'Distribution of isoform lengths':{'x':'isoform_length','y':'dist','type':'gene_features'},
     'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
+    'Distribution of numbers of isoforms':{'x':'num_isoforms','y':'dist','type':'gene_features'},
     'Histogram of Abundance Recovery Rate':{'x':'arr','y':'freq','type':'estimation_error'},
     'Correlation of estimated abundance and ground truth':{'x':'true_abund','y':'estimated_abund','type':'estimation_error'},
     'Correlation Boxplot of estimated abundance and ground truth':{'x':'true_abund','y':'estimated_abund','type':'estimation_error'},
@@ -131,6 +136,7 @@ single_sample_plot_figures = {
     'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     'Statistics with different isoform lengths':{'x':'isoform_length','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
+    'Statistics with different numbers of isoforms':{'x':'num_isoforms','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     'Statistics with different expression level':{'x':'log2_true_abund','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     # 'Standard deviation vs estimated abundance scatter':{'x':'estimated_abund','y':'std','type':'estimation_error'},
 }
@@ -138,6 +144,7 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     'Distribution of K values':{'x':'K_value','y':'dist','type':'gene_features'},
     'Distribution of isoform lengths':{'x':'isoform_length','y':'dist','type':'gene_features'},
     'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
+    'Distribution of numbers of isoforms':{'x':'num_isoforms','y':'dist','type':'gene_features'},
 
     'Estimation Error for different conditions':{'x':'metrics','y':['nrmse','mrd','spearmanr'],'type':'estimation_error'},
     'Histogram of Abundance Recovery Rate':{'x':'arr','y':'freq','type':'estimation_error'},
@@ -155,6 +162,7 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in multi_sample_diff_condition_table_metrics],'type':'statistics'},
     'Statistics with different isoform lengths':{'x':'isoform_length','y':[m['id'] for m in multi_sample_diff_condition_table_metrics],'type':'statistics'},
     'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in multi_sample_diff_condition_table_metrics],'type':'statistics'},
+    'Statistics with different numbers of isoforms':{'x':'num_isoforms','y':[m['id'] for m in multi_sample_diff_condition_table_metrics],'type':'statistics'},
     'Statistics with different expression level':{'x':'ave_true_abund','y':[m['id'] for m in multi_sample_diff_condition_table_metrics],'type':'statistics'},
     
     
@@ -164,11 +172,16 @@ multi_sample_diff_condition_without_ground_truth_plot_figures = {
     'Distribution of K values':{'x':'K_value','y':'dist','type':'gene_features'},
     'Distribution of isoform lengths':{'x':'isoform_length','y':'dist','type':'gene_features'},
     'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
+    'Distribution of numbers of isoforms':{'x':'num_isoforms','y':'dist','type':'gene_features'},
+
     'Standard deviation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
+    'Consistency Measure curve':{'x':'C threshold','y':'CM','type':'consistency'},
     'Resolution Entropy for different conditions':{'x':'','y':'RE','type':'resolution_entropy'},
     'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
     'Statistics with different isoform lengths':{'x':'isoform_length','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
     'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
+    'Statistics with different numbers of isoforms':{'x':'num_isoforms','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
+
 }
 transform_options = [
     {'label': 'Linear', 'value': 'linear'},
@@ -185,8 +198,12 @@ annot_options = [
     {'label':'lrgasp_gencode_vM27_sirvs(mouse)','value':'mouse'},
     {'label':'Ensembl_Homo_sapiens.GRCh38.104.chr(human)','value':'ensembl_human'},
 ]
-# K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,11)]
-K_value_ranges = [i/10 for i in range(11)]
-condition_number_ranges = [i*2.5 for i in range(10)] + [i*25 for i in range(1,21,2)]
-generalized_condition_number_ranges = [i for i in range(11)] + [i*25 for i in range(1,11)]
+num_isoforms_range = [1,3,5,7,9,11,13,15,20]
+num_exons_range = [1,3,5,7,9,11,13,15,20]
+K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,5)]
+# K_value_ranges = [i/10 for i in range(11)]
+# condition_number_ranges = [i*2.5 for i in range(10)] + [i*25 for i in range(1,21,2)]
+# condition_number_ranges = [i for i in range(11)] + [i*25 for i in range(1,11)]
+# condition_number_ranges = [i for i in range(1,22,4)]
+condition_number_ranges = [1,2,3,4,5,6,7,9,12]
 ARR_ranges = [i/10 for i in range(11)]

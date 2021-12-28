@@ -130,7 +130,7 @@ def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,gro
         dfs,anno_df,method_names = args
         if (is_multi_sample == False):
             sections[1]['legend'] = generate_method_legend(method_names)
-            plotter = Single_sample_multi_method_plotter(dfs,anno_df,method_names)
+            plotter = Single_sample_multi_method_plotter(dfs,anno_df,method_names,output_path)
             for plot_figure_name in single_sample_plot_figures:
                 define_write_to_file_theme()
                 fig = plotter.plot(plot_figure_name, 'all')
@@ -142,7 +142,7 @@ def make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,gro
                 sections[section_indices[section_id]]['plots'].append({'title':plot_figure_name,'html_str':html_str})
         else:
             sections[1]['legend'] = generate_method_legend(method_names)
-            plotter = Multi_sample_multi_method_plotter(dfs,anno_df,method_names)
+            plotter = Multi_sample_multi_method_plotter(dfs,anno_df,method_names,output_path)
             if (ground_truth_given):
                 figures = multi_sample_diff_condition_with_ground_truth_plot_figures
             else:

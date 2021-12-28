@@ -64,8 +64,12 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_roc(self,x_axis_column_name,y_axis_column_name,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
-        fpr,tpr,_ = roc_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
-        auc = roc_auc_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        fpr,tpr,_ = roc_curve((plot_df['true_alfc'] > 1),plot_df['alfc'])
+        auc = roc_auc_score((plot_df['true_alfc'] > 1),plot_df['alfc'])
+        # fpr,tpr,_ = roc_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        # auc = roc_auc_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        # fpr,tpr,_ = roc_curve(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
+        # auc = roc_auc_score(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
         df = pd.DataFrame({'fpr':fpr,'tpr':tpr})
         fig = go.Figure(go.Scatter(x=df[x_axis_column_name],y=df[y_axis_column_name],mode='lines'))
         fig.update_layout(
@@ -82,8 +86,12 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_pr(self,x_axis_column_name,y_axis_column_name,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
-        precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
-        aps = average_precision_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > 1),plot_df['alfc'])
+        aps = average_precision_score((plot_df['true_alfc'] > 1),plot_df['alfc'])
+        # precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        # aps = average_precision_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+        # precision,recall,_ = precision_recall_curve(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
+        # aps = average_precision_score(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
         df = pd.DataFrame({'precision':precision,'recall':recall})
         fig = go.Figure(go.Scatter(x=df[x_axis_column_name],y=df[y_axis_column_name],mode='lines'))
         fig.update_layout(
@@ -120,7 +128,7 @@ class Multi_sample_plotter(Plotter):
             else:
                 if ((y_axis_column_name in ['mrd']) & (x_axis_column_name=='K_value')):
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: prepare_grouped_violin_data(
-                        y_axis_column_name, df,True)).explode().to_frame().reset_index()
+                        y_axis_column_name, df)).explode().to_frame().reset_index()
                 else:
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: prepare_grouped_violin_data(
                                 y_axis_column_name, df)).explode().to_frame().reset_index()
@@ -292,7 +300,7 @@ class Multi_sample_plotter(Plotter):
             fig = self.plot_roc(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'PR curves for performance of quantification':
             fig = self.plot_pr(x_axis_column_name,y_axis_column_name,scale)
-        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different expression level']:
+        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different numbers of isoforms','Statistics with different expression level']:
             fig = self.plot_grouped_violin(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)

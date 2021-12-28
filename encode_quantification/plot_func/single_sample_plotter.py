@@ -47,10 +47,10 @@ class Single_sample_plotter(Plotter):
             y_axis_column_name = y_axis_column_names[i]
             if ((y_axis_column_name in ['mrd']) & (x_axis_column_name == 'K_value')):
                 group_series = plot_df.groupby(by='group_range').apply(lambda df: get_single_sample_metric(
-                    y_axis_column_name, df['true_abund'], df['estimated_abund'],plot_df, True )).to_frame().reset_index()
+                    y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
             else:
                 group_series = plot_df.groupby(by='group_range').apply(lambda df: get_single_sample_metric(
-                    y_axis_column_name, df['true_abund'], df['estimated_abund'],plot_df)).to_frame().reset_index()
+                    y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
             group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                 by=['group_range'], key=lambda col: custom_sort(col))
             fig.add_trace(go.Scatter(x=group_series['group_range'], y=group_series[y_axis_column_name],
@@ -140,7 +140,7 @@ class Single_sample_plotter(Plotter):
             fig = self.plot_dist(x_axis_column_name, scale)
         elif plot_figure_name == 'Histogram of Abundance Recovery Rate':
             fig = self.plot_arr(x_axis_column_name, scale)
-        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different expression level']:
+        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different numbers of isoforms','Statistics with different expression level']:
             fig = self.plot_grouped_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)

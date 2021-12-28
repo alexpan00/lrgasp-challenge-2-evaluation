@@ -6,6 +6,8 @@ from preprocess import *
 from report_generator.plot import make_plots
 from report_generator.table import generate_table
 from plot_func.multi_method_plotter import Multi_method_plotter
+import pickle
+import pandas as pd
 all_sections = [
     {'name':'Gene features','id':'gene_features','plots':[]},
     {'name':'Methods Legend','id':'method_legend','legend':[]},
@@ -31,6 +33,26 @@ def generate_output(output,output_path):
             shutil.copy(src_file, dst_dir)
     with open(os.path.join(output_path,'Report.html'),'w') as f:
         f.write(output)
+    results = []
+    with open('{}/plot.pkl'.format(output_path),'rb') as f:
+        while 1:
+            try:
+                res = pickle.load(f)
+                results.append(res)
+            except:
+                break
+    with open('{}/plot.txt'.format(output_path),'w') as f:
+        for res in results:
+            names = ['','','data','mean','error']
+            for item,name in zip(res,names):
+                if type(item) == pd.DataFrame:
+                    f.write('{}\n'.format(name))
+                    f.write(item.to_csv())
+                    f.write('\n')
+                else:
+                    f.write('{}\n'.format(item))
+            f.write('\n\n')
+    os.remove('{}/plot.pkl'.format(output_path))
 def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection):
     input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
     if (is_multi_method == False):
@@ -70,6 +92,8 @@ def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_samp
 
     else:
         dfs,anno_df,method_names = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection) 
+        with open('{}/df.pkl'.format(output_path),'wb') as f:
+            pickle.dump(dfs,f)
         args = (dfs,anno_df,method_names)
         sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
         sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
@@ -84,14 +108,14 @@ def parse_arguments():
     requiredNamed = parser.add_argument_group('required named arguments')
     requiredNamed.add_argument('-a','--annotation', type=str, help="The path of annotation file [GTF]",required=True)
     requiredNamed.add_argument('-r','--result', type=str, help="The path of quantification result file [TSV\ZIP]",required=True)
-    requiredNamed.add_argument('-t','--truth', type=str, help="The path of true expression file [TSV]")
     requiredNamed.add_argument('-o','--output', type=str, help="The path of output directory",required=True)
      
     requiredNamed.add_argument('--num_method',  type=str,help="Whether multi method data given ['Single' or 'Multi']")
     requiredNamed.add_argument('--num_samples',   type=str, help="Whether multi sample data given ['Single' or 'Multi']")
     optional = parser.add_argument_group('optional arguments')
-    optional.add_argument('--seq',  type=str,help="Whether long read data given ['LongRead' or 'ShortRead'] [default:LongRead]",default='LongRead')
-    optional.add_argument('--K_value_selection',  type=str,help="Which K value calculation['Condition_number','K_value','Generalized_condition_number'] [default:Condition_number]",default='Condition_number')
+    optional.add_argument('-t','--truth', type=str, help="The path of true expression file [TSV]")
+    optional.add_argument('--seq',  type=str,help="Whether long read data given ['LongRead' or 'ShortRead'] [default:ShortRead]",default='ShortRead')
+    optional.add_argument('--K_value_selection',  type=str,help="Which K value calculation['Condition_number','K_value','Generalized_condition_number'] [default:Generalized_condition_number]",default='Generalized_condition_number')
     # optional = parser.add_argument_group('optional arguments')
     # optional.add_argument('--num_iterations',type=int,default=100, help="Number of iterations for EM algorithm [default:100]")
     
@@ -112,13 +136,3 @@ def parse_arguments():
     render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,args.K_value_selection)
 if __name__ == "__main__":
     parse_arguments()
-# annotation_path = '/home/tidesun/data/zebrafish/Danio_rerio.gtf'
-# quantif_res_path = '/home/tidesun/data/zebrafish/results.zip'
-# truth_path = '/home/tidesun/data/zebrafish/true_expression.tsv'
-# for is_multi_sample in [True,False]:
-#     output_path = '/home/tidesun/reports/multi_method_{}'.format(is_multi_sample)
-#     render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,True)
-# quantif_res_path = '/home/tidesun/data/zebrafish/StringTie.tsv'
-# for is_multi_sample in [True,False]:
-#     output_path = '/home/tidesun/reports/single_method_{}'.format(is_multi_sample)
-#     render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_sample,False)

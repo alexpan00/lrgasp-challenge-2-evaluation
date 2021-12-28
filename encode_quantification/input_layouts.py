@@ -19,7 +19,7 @@ input_layout = html.Div(children=[
     html.Label(["Data types",
             dcc.RadioItems(
                 options=data_sample_options, id='data_sample_option', value='single_sample', labelStyle={'display': 'inline-block'})]),
-    html.Label(["Multi methods",
+    html.Label(["Number of methods",
         dcc.RadioItems(
             options=multi_methods_options, id='multi_methods_option', value='single_method', labelStyle={'display': 'inline-block'})]),
     html.Div(["Quantification result",

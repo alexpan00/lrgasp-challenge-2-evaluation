@@ -5,7 +5,7 @@ import dash_uploader as du
 
 app = dash.Dash(__name__,
                 suppress_callback_exceptions=True)
-app.title = 'Quantification'
+app.title = 'LRGASP quantification evaluation'
 
 config = {
     "DEBUG": True,          # some Flask specific configs

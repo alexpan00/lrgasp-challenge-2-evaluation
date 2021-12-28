@@ -9,14 +9,14 @@ from sklearn.metrics import roc_curve,precision_recall_curve,average_precision_s
 from preprocess_util import *
 from plot_func.plot_util_multi_method import *
 from plot_func.multi_method_plotter import Multi_method_plotter
-
+import pickle
 class Multi_sample_multi_method_plotter(Multi_method_plotter):
-    def __init__(self,plot_dfs,anno_df,method_names):
-        Multi_method_plotter.__init__(self,plot_dfs,anno_df,method_names)
+    def __init__(self,plot_dfs,anno_df,method_names,output_path):
+        Multi_method_plotter.__init__(self,plot_dfs,anno_df,method_names,output_path)
     def plot_dist(self,x_axis_column_name, scale):
         return Multi_method_plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name,scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.method_names))):
             plot_df = filter_by_scale(scale, plot_df)
             arr_columns = [x for x in list(plot_df.columns) if 'arr_' in x]
@@ -28,13 +28,14 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 arr_df = arr_df.groupby(by='group_range').count()
                 arr_df['Frequency_{}'.format(i+1)] = arr_df['arr']/arr_df['arr'].sum()
                 arr_dfs.append(arr_df['Frequency_{}'.format(i+1)])
-            
             for row,start_col,end_col in zip([1,2],[0,len(arr_dfs)//2],[len(arr_dfs)//2,len(arr_dfs)]):
                 plot_df = pd.concat(arr_dfs[start_col:end_col],axis=1)
                 plot_df['Frequency'] = plot_df.mean(axis=1)
                 plot_df['Error'] = plot_df.std(axis=1)
+                plot_df.index.rename('group_range',inplace=True)
                 plot_df = plot_df.reset_index()
                 fill_na_df = pd.DataFrame({'group_range':['{:.0%}-{:.0%}'.format(i/10,(i+1)/10) for i in range(1,10)]+['<=10%','>100%'],'Frequency':[0 for i in range(11)],'Error':[0 for i in range(11)]}).set_index('group_range')
+                
                 plot_df = plot_df.append(fill_na_df.loc[fill_na_df.index.difference(pd.Index(plot_df['group_range']))].reset_index())
                 plot_df = plot_df.sort_values(
                     by=['group_range'], key=lambda col: custom_sort(col, ARR_ranges))
@@ -50,7 +51,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_stats_box(self,y_axis_column_names,scale):
         [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(self.plot_dfs[0],y_axis_column_names)
         col_num = len(cond1_metric_dicts)
-        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,y_axis_column_names)
@@ -70,7 +71,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         return fig
     def plot_resolution_entropy(self,scale):
         col_num = 1
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
@@ -92,8 +93,12 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig = go.Figure()
         for plot_df,method_name,i in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
-            fpr,tpr,_ = roc_curve(plot_df['true_alfc'] > plot_df['true_alfc'].median(),plot_df['alfc'])
-            auc = roc_auc_score(plot_df['true_alfc'] > plot_df['true_alfc'].median(),plot_df['alfc'])
+            fpr,tpr,_ = roc_curve(plot_df['true_alfc'] > 1,plot_df['alfc'])
+            auc = roc_auc_score(plot_df['true_alfc'] > 1,plot_df['alfc'])
+            # fpr,tpr,_ = roc_curve(plot_df['true_alfc'] > plot_df['true_alfc'].median(),plot_df['alfc'])
+            # auc = roc_auc_score(plot_df['true_alfc'] > plot_df['true_alfc'].median(),plot_df['alfc'])
+            # fpr,tpr,_ = roc_curve(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
+            # auc = roc_auc_score(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
             df = pd.DataFrame({'fpr':fpr,'tpr':tpr})
             fig.add_trace(go.Scatter(x=df[x_axis_column_name],y=df[y_axis_column_name],name=method_name,mode='lines',line = dict(color=color_schemes[i])))
             fig.update_layout(
@@ -112,8 +117,12 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig = go.Figure()
         for plot_df,method_name,i in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
-            precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
-            aps = average_precision_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+            precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > 1),plot_df['alfc'])
+            aps = average_precision_score((plot_df['true_alfc'] > 1),plot_df['alfc'])
+            # precision,recall,_ = precision_recall_curve((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+            # aps = average_precision_score((plot_df['true_alfc'] > plot_df['true_alfc'].median()),plot_df['alfc'])
+            # precision,recall,_ = precision_recall_curve(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
+            # aps = average_precision_score(plot_df['true_alfc'] > np.quantile(plot_df['true_alfc'],0.8),plot_df['alfc'])
             df = pd.DataFrame({'precision':precision,'recall':recall})
             fig.add_trace(go.Scatter(x=df[x_axis_column_name],y=df[y_axis_column_name],name=method_name,mode='lines',line = dict(color=color_schemes[i])))
             fig.update_layout(
@@ -197,7 +206,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         aucs = []
         x_range_max = []
         y_range_max = []
-        fig = make_subplots(cols=figure_cols,rows=figure_rows,vertical_spacing=0.1, horizontal_spacing=0.1)
+        fig = make_subplots(cols=figure_cols,rows=figure_rows,vertical_spacing=0.1, horizontal_spacing=0.05)
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             # row_num = math.ceil((j+1)/figure_cols)
             # col_num = j % figure_cols+1
@@ -213,8 +222,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             y_range_max.append(max(CM_list))
             fig.update_xaxes(title_text='C threshold',row=row_num, col=col_num)
             fig.update_yaxes(title_text='Consistency Measure',row=row_num, col=col_num)
-        y_range_max = [0.35]
-        x_range_max = [5500]
+        y_range_max = [0.2]
+        x_range_max = [1000]
         fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*0.85,text='ACMC',showarrow=False)
         for auc,method_name,j in zip(aucs,self.method_names,range(len(aucs))):
             fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*(0.8-0.1*j),
@@ -227,7 +236,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
 
     def plot_corr_scatter(self,x_axis_column_names, y_axis_column_names,scale):
         subplot_titles = ['{} Condition {}'.format(M,i+1) for i in range(2) for M in self.method_names]
-        fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.1,)
+        fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.05,)
         col_num = 0
         row_num = 0
         x_maxs,y_maxs = [],[]
@@ -237,7 +246,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             for plot_df,method_name,i in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
                 plot_df = filter_by_scale(scale, plot_df)
                 col_num += 1
-                df = plot_df[(plot_df[x_axis_column_name] >=1) &  (plot_df[y_axis_column_name] >= 1)]
+                df = plot_df
+                # df = plot_df[(plot_df[x_axis_column_name] >=1) |  (plot_df[y_axis_column_name] >= 1)]
                 x,y,density = get_density(df[x_axis_column_name],df[y_axis_column_name])
                 fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis')),row=row_num, col=col_num)
                 fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True}),row=row_num, col=col_num)
@@ -245,13 +255,13 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 y_maxs.append(max(y))
         x_title = 'Log2(True abundance+1)'
         y_title = 'Log2(Estimated abundance+1)'
-        fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs+y_maxs)])
-        fig.update_yaxes(title_text=y_title,range=[1,max(x_maxs+y_maxs)])
+        fig.update_xaxes(title_text=x_title,range=[0,max(x_maxs+y_maxs)])
+        fig.update_yaxes(title_text=y_title,range=[0,max(x_maxs+y_maxs)])
         fig.update_layout(showlegend=False,autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
         return fig
     def plot_std_scatter(self,x_axis_column_names, y_axis_column_names,scale):
         subplot_titles = ['{} Condition {}'.format(M,i+1) for i in range(2) for M in self.method_names]
-        fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.1)
+        fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.05)
         col_num = 0
         row_num = 0
         x_maxs,y_maxs = [],[]
@@ -285,7 +295,9 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         violin_specs = [[{"type": "violin", "colspan": figure_cols}]+[None for i in range(line_figure_cols-1)] for i in range(len(violin_column_names))]
         line_specs = [[{"type": "scatter"} for i in range(line_figure_cols)] for j in range(line_figure_rows)]
         ranges,max_threshold = prepare_ranges(self.plot_dfs[0],x_axis_column_name)
-        fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.05, horizontal_spacing=0.1,specs=violin_specs+line_specs)
+        fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.05, horizontal_spacing=0.05,specs=violin_specs+line_specs)
+        #debug
+        f = open('{}/plot.pkl'.format(self.output_path),'ab')
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
             plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name,ranges,max_threshold)
@@ -295,7 +307,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 col_num = 1
                 if ((y_axis_column_name in ['mrd']) & (x_axis_column_name=='K_value')):
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: prepare_grouped_violin_data(
-                        y_axis_column_name, df,True)).explode().to_frame().reset_index()
+                        y_axis_column_name, df)).explode().to_frame().reset_index()
                 else:
                     group_series = plot_df.groupby(by='group_range').apply(lambda df: prepare_grouped_violin_data(
                                 y_axis_column_name, df)).explode().to_frame().reset_index()
@@ -310,6 +322,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 error_y = dict(type='data',array=error_bar_group_series['Error'])
                 if (error_y['array'].isna()).all():
                     error_y = None
+                pickle.dump([method_name, x_axis_column_name,group_series,mean_series,error_series],f)
                 fig.add_trace(go.Bar(x=error_bar_group_series['group_range'],y=error_bar_group_series['Mean'],error_y=error_y,name=method_name,showlegend=False,marker_color=color_schemes[j]),row=row_num,col=col_num)
                 # fig.add_trace(go.Violin(x=group_series['group_range'], y=group_series[y_axis_column_name],offsetgroup=j,
                 #                                 name=method_name, box_visible=False, meanline_visible=False,marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
@@ -326,6 +339,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                     lambda df: prepare_grouped_violin_data(y_axis_column_name, df)).to_frame().reset_index()
                 group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                     by=['group_range'], key=lambda col: custom_sort(col))
+                pickle.dump([method_name, x_axis_column_name,group_series],f)
                 if y_axis_column_name=='RE':
                     fig.add_trace(go.Bar(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         name=method_name,marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
@@ -336,6 +350,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                     title_text=on_plot_shown_label[x_axis_column_name],tickangle = 45, row=row_num, col=col_num)
                 fig.update_yaxes(
                     title_text=on_plot_shown_label[y_axis_column_name], row=row_num, col=col_num)
+        f.close()
         fig.update_traces(showlegend=True,col=1,row=1)
         # fig.update_traces(line=dict(width=3))
         fig.update_layout(
@@ -359,7 +374,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_roc(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'PR curves for performance of quantification':
             fig = self.plot_pr(x_axis_column_name,y_axis_column_name,scale)
-        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different expression level']:
+        elif plot_figure_name in ["Statistics with different K values",'Statistics with different isoform lengths','Statistics with different numbers of exons','Statistics with different numbers of isoforms','Statistics with different expression level']:
             fig = self.plot_grouped_violin(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)
