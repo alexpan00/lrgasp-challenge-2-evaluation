@@ -1,4 +1,7 @@
-# LRGASP visualization
+# lrgasp-challenge-2-evaluation
+## Web application
+We have a web application that illustrates the evaluation plots and functions [here](https://lrrna-seq-quantification.org).<br>
+For a live video demo of this web app, you can check [here](https://youtu.be/y02MI8ZyF-E).
 ## Requirements
 Running python 3.7 and linux64 on your machine
 ## Install
@@ -11,18 +14,20 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 ## Input 
-- Gene/isoform annotation: GTF format 
+- Gene/isoform annotation: GTF format
+    - Human and Mouse reference annoation with spike-in at [Link](https://lrgasp.github.io/lrgasp-submissions/docs/reference-genomes.html#transcriptome-references)
 - Quantification result:
 
 | # Sample | # Methods | Format | Columns                                                                                                                                                                     | Example Data Path          |
 |----------|-----------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
-| Single| Single    | TSV    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methodA.tsv` |
-|Multiple| Single    | TSV    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methodA.tsv`  |
-|Single| Multiple  | ZIP    | First column: ID<br>Second column: Quanficiation result for single sample                                                                                                   | `singlesample/methods.zip` |
-|Multiple| Multiple  | ZIP    | First column: ID<br>Next N columns:<br>  [2,N/2 + 1] columns: Quantification result under condition A<br>  [N/2 + 2,N + 1] columns: Quantification result under condition B | `multisample/methods.zip`  |
+| Single| Single    | TSV    | <b>First column:</b> ID<br><b>Second column:</b> Quanficiation result for single sample                                                                                                   | [single sample data](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/singlesample/methodA.tsv) |
+|Multiple| Single    | TSV    | <b>First column:</b> ID<br><b>Next N columns:</b> Quantification results for multiple samples | [multiple samples data](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methodA.tsv)  |
+|Single| Multiple  | ZIP    | <b>First column:</b> ID<br><b>Second column:</b> Quanficiation result for single sample                                                                                                   | [multiple methods with single sample](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/singlesample/methods.zip) |
+|Multiple| Multiple  | ZIP    | <b>First column:</b> ID<br><b>Next N columns:</b> Quantification results for multiple samples  | [multiple methods with multiple samples](https://raw.githubusercontent.com/Tidesun/LRGASP_visualization/main/example/multisample/methods.zip)  |
 
 
-\* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)
+\* TSV format is defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md)    
+\* Multiple methods result files should be named as the method name and the output will be named accordingly.
 - Expression ground truth:
   - TSV format as defined in (https://github.com/LRGASP/lrgasp-submissions/blob/master/docs/expression_matrix_format.md).
 
@@ -56,14 +61,22 @@ required named arguments:
                         The path of annotation file [GTF]
   -r RESULT, --result RESULT
                         The path of quantification result file [TSV\ZIP]
-  -t TRUTH, --truth TRUTH
-                        The path of true expression file [TSV]
   -o OUTPUT, --output OUTPUT
                         The path of output directory
   --num_method NUM_METHOD
                         Whether multi method data given ['Single' or 'Multi']
   --num_samples NUM_SAMPLES
                         Whether multi sample data given ['Single' or 'Multi']
+
+optional arguments:
+  -t TRUTH, --truth TRUTH
+                        The path of true expression file [TSV]
+  --seq SEQ             Whether long read data given ['LongRead' or
+                        'ShortRead'] [default:LongRead]
+  --K_value_selection K_VALUE_SELECTION
+                        Which K value calculation['Condition_number','K_value'
+                        ,'Generalized_condition_number']
+                        [default:Condition_number]
 ```
 ## Example
 ### Single method evaluation
