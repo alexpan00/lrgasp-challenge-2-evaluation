@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
+from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes,condition_1_name,condition_2_name
 from sklearn.metrics import roc_curve,precision_recall_curve,average_precision_score,roc_auc_score
 from preprocess_util import *
 from plot_func.plot_util import *
@@ -16,7 +16,7 @@ class Multi_sample_plotter(Plotter):
     def plot_dist(self,x_axis_column_name, scale):
         return Plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name, scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
         plot_df = filter_by_scale(scale, self.plot_df)
         arr_columns = [x for x in list(plot_df.columns) if 'arr_' in x]
         arr_dfs = []
@@ -53,8 +53,8 @@ class Multi_sample_plotter(Plotter):
         fig = make_subplots(rows=1, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,)
         for i,cond1_metric_dict,cond2_metric_dict in zip(range(col_num),cond1_metric_dicts,cond2_metric_dicts):
             M = on_plot_shown_label[cond1_metric_dict['Metric']]
-            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),name='Condition 1',showlegend=False,marker_color=color_schemes[0]),row=1,col=i+1)
-            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),name='Condition 2',showlegend=False,marker_color=color_schemes[1]),row=1,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),name=condition_1_name,showlegend=False,marker_color=color_schemes[0]),row=1,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),name=condition_2_name,showlegend=False,marker_color=color_schemes[1]),row=1,col=i+1)
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             width=fig_size['small_rec']['width']*col_num,
@@ -194,7 +194,7 @@ class Multi_sample_plotter(Plotter):
             x_maxs.append(max(x))
             y_maxs.append(max(y))
         x_title = 'Log2(Estimated abundance+1)'
-        y_title = 'std'
+        y_title = 'COV'
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
         fig.update_yaxes(title_text=y_title,range=[0,max(y_maxs)])
         fig.update_layout(showlegend=False,autosize=False,width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['small_multi'])
@@ -231,7 +231,7 @@ class Multi_sample_plotter(Plotter):
         fig.update_yaxes(range=[min(y_mins),max(y_maxs)])
         fig.update_layout(
             xaxis_title= 'Log2(Estimated abundance+1)',
-            yaxis_title= 'std',
+            yaxis_title= 'COV',
             autosize=False,showlegend=True,width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['large_multi'])
         return fig
     def plot_consistency_measure_curve(self,x_axis_column_names,y_axis_column_names,scale):
@@ -239,17 +239,17 @@ class Multi_sample_plotter(Plotter):
         CM_list,C_ranges = prepare_consistency_measure_plot_data(plot_df)
         auc = np.trapz(CM_list,C_ranges)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=C_ranges,y=CM_list,mode='lines',name='Consistency Measure'))
+        fig.add_trace(go.Scatter(x=C_ranges,y=CM_list,mode='lines',name='Log2 consistency Measure'))
         fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.85,text='ACMC',showarrow=False)
-        fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.8,
+        fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.84,
                 text="{:.3f}".format(auc),showarrow=False)
         fig.update_layout(
             xaxis_title= 'C threshold',
-            yaxis_title= 'Consistency Measure',
+            yaxis_title= 'Log2 consistency Measure',
             autosize=False,showlegend=True,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'])
         return fig
     def plot_resolution_entropy(self,scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
         plot_df = filter_by_scale(scale, self.plot_df)
         [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,'RE')
         cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
@@ -304,7 +304,7 @@ class Multi_sample_plotter(Plotter):
             fig = self.plot_grouped_violin(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)
-        elif plot_figure_name in ['Standard deviation vs estimated abundance scatter']:
+        elif plot_figure_name in ['coefficient of variation vs estimated abundance scatter']:
             fig = self.plot_std_scatter(x_axis_column_name, y_axis_column_name, scale)
         elif y_axis_column_name == 'dist':
             fig = self.plot_dist(x_axis_column_name, scale)
@@ -312,7 +312,7 @@ class Multi_sample_plotter(Plotter):
             fig = self.plot_arr(x_axis_column_name, scale)
         elif plot_figure_name == 'Estimation Error for different conditions':
             fig = self.plot_stats_box(y_axis_column_name,scale)
-        elif plot_figure_name == 'Standard deviation vs estimated abundance curve':
+        elif plot_figure_name == 'coefficient of variation vs estimated abundance curve':
             fig = self.plot_multi_sample_std_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Consistency Measure curve':
             fig = self.plot_consistency_measure_curve(x_axis_column_name,y_axis_column_name,scale)

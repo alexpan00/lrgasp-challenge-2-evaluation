@@ -78,7 +78,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis'),showlegend=False), col=i+1,row=1)
             fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True},showlegend=False),  col=i+1,row=1)
         x_title = 'Log2(Estimated abundance+1)'
-        y_title = 'std'
+        y_title = 'COV'
         fig.update_layout(autosize=False,width=fig_size['small_square']['width']*len(self.plot_dfs),height=fig_size['small_square']['height'],template=themes['large_single'])
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
         fig.update_yaxes(title_text=y_title)
@@ -90,7 +90,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
         # figure_cols = math.ceil(len(y_axis_column_names)/ figure_rows)
         fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.25, horizontal_spacing=0.1)
         ranges,max_threshold = prepare_ranges(self.plot_dfs[0],x_axis_column_name)
-        f = open('{}/plot.pkl'.format(self.output_path),'ab')
+        # f = open('{}/plot.pkl'.format(self.output_path),'ab')
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
             plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name,ranges,max_threshold)
@@ -168,7 +168,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_grouped_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)
-        elif plot_figure_name in ['Standard deviation vs estimated abundance scatter']:
+        elif plot_figure_name in ['coefficient of variation vs estimated abundance scatter']:
             fig = self.plot_std_scatter(x_axis_column_name, y_axis_column_name, scale)
         elif plot_figure_name == 'Correlation Boxplot of estimated abundance and ground truth':
             fig = self.plot_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)

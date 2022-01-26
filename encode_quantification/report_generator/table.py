@@ -4,7 +4,7 @@ from preprocess import *
 table_comment = {
     'consistency':'Consistency Measure (CM) is calculated for C threshold  = 1',
     # 'consistency':'Resolution Entropy (RE) is calculated by the',
-    'reproducibility':'Reproducibility Measure (RM) is calculated by the L2 norm of the standard deviation',
+    'Irreproducibility':'Irreproducibility Measure (RM) is calculated by the L2 norm of the coefficient of variation',
 }
 def generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections):
     data, columns = [],[]
@@ -39,8 +39,8 @@ def generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read
             shown_columns = ['Resolution Entropy']
         elif sections[i]['id'] == 'consistency':
             shown_columns = ['Consistency Measure']
-        elif sections[i]['id'] == 'reproducibility':
-            shown_columns = ['Reproducibility Measure']
+        elif sections[i]['id'] == 'Irreproducibility':
+            shown_columns = ['Irreproducibility Measure']
         elif sections[i]['id'] == 'fold_change':
             shown_columns = ['Precision', 'Recall', 'Accuracy', 'F1 Score', 'AUC']
         if len(shown_columns) > 0:

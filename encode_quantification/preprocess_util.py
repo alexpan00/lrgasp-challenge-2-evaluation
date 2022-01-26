@@ -99,7 +99,7 @@ def get_multi_sample_metric(metric,df,ground_truth, estimated):
         # return get_consistency_measures(estimated,np.median(estimated))
         return get_consistency_measures(estimated,1)
     elif metric == 'RM':
-        std_1,std_2 = df['std#1'].values,df['std#2'].values
+        std_1,std_2 = df['COV#1'].values,df['COV#2'].values
         return np.sqrt(np.mean([np.square(std_1),np.square(std_2)]))
     elif metric == 'RE':
         return np.median([get_resolution_entropy(estimated[:,i],100) for i in range(estimated.shape[1])])
@@ -110,7 +110,7 @@ def preprocess_single_sample_util(df, kvalues_dict,num_exon_dict,isoform_length_
 
     df['estimated_abund'] = normalize(df['estimated_abund'])
     df['true_abund'] = normalize(df['true_abund'])
-    df['std'] = (df['true_abund'] - df['estimated_abund']) / 2
+    df['COV'] = (df['true_abund'] - df['estimated_abund']) / ((df['true_abund'] + df['estimated_abund'])/2)
     df['arr'] = df['estimated_abund'] / df['true_abund']
     df.loc[np.isinf(df['arr']),'arr'] = 0
     df['log2_true_abund'] = np.log2(df['true_abund']+1)
@@ -125,12 +125,12 @@ def preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df,
     df = pd.DataFrame()
     df['isoform'] = estimated_df[0]
     df = df.set_index('isoform').assign(K_value=pd.Series(kvalues_dict),num_exons=pd.Series(num_exon_dict),isoform_length=pd.Series(isoform_length_dict),gene=pd.Series(isoform_gene_dict),num_isoforms=pd.Series(num_isoforms_dict)).reset_index()
-    df['std'] = np.std(np.log2(estimated_arr+1),axis=1)
-    df['std#1'] = np.std(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1)
-    df['std#2'] = np.std(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1)
-    # df['std'] = np.std(estimated_arr+1,axis=1)
-    # df['std#1'] = np.std(estimated_arr[:,:condition_column_split_index]+1,axis=1)
-    # df['std#2'] = np.std(estimated_arr[:,condition_column_split_index:]+1,axis=1)
+    df['COV'] = np.std(np.log2(estimated_arr+1),axis=1)/(np.mean(np.log2(estimated_arr+1),axis=1) + 0.01)
+    df['COV#1'] = np.std(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1)/(np.mean(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1) + 0.01)
+    df['COV#2'] = np.std(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1)/(np.mean(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1) + 0.01)
+    # df['COV'] = np.std(estimated_arr+1,axis=1)
+    # df['COV#1'] = np.std(estimated_arr[:,:condition_column_split_index]+1,axis=1)
+    # df['COV#2'] = np.std(estimated_arr[:,condition_column_split_index:]+1,axis=1)
     df['ave_estimated_abund'] = np.mean(np.log2(estimated_arr+1),axis=1)
     df['ave_estimated_abund#1'] = np.mean(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1)
     df['ave_estimated_abund#2'] = np.mean(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1)
@@ -256,7 +256,7 @@ def prepare_consistency_measure_plot_data(df):
     n_bins = 1000
     _,C_ranges = pd.cut(estimated_arr.flatten(), n_bins, retbins=True,include_lowest=True)
     C_ranges[0] = 1
-    CM_list = [get_consistency_measures(estimated_arr,K) for K in C_ranges]
+    CM_list = [np.log2(get_consistency_measures(estimated_arr,K)) for K in C_ranges]
     return CM_list,C_ranges
 def prepare_corr_box_plot_data(estimated_arr,true_expression_arr,shared_bins=None):
     n_bins = 4
@@ -277,7 +277,7 @@ def prepare_corr_box_plot_data(estimated_arr,true_expression_arr,shared_bins=Non
 #         NRMSE = (np.square(estimated_arr-true_expression_arr).mean(axis=0) / (np.std(true_expression_arr, axis=0))).mean()
 #         MRD = np.mean(np.linalg.norm(estimated_arr-true_expression_arr) /
 #                     np.linalg.norm(true_expression_arr))
-#     RM = np.sqrt(np.square(df['std']).sum())
+#     RM = np.sqrt(np.square(df['COV']).sum())
 #     return [{'spearmanr': spearmanr, 'nrmse': NRMSE, 'mrd': MRD,'rm':RM}]
 # def preprocess_multi_sample_df_same_condition(estimated_df,true_expression_df,annotation):
 #     kvalues_dict = get_kvalues_dict(annotation)
@@ -285,7 +285,7 @@ def prepare_corr_box_plot_data(estimated_arr,true_expression_arr,shared_bins=Non
 #     true_expression_arr = true_expression_df.drop(0,axis=1).to_numpy()
 #     df = pd.DataFrame()
 #     df['isoform'] = estimated_df[0]
-#     df['std'] = np.std(np.log2(estimated_arr+1),axis=1)
+#     df['COV'] = np.std(np.log2(estimated_arr+1),axis=1)
 #     df['ave_estimated_abund'] = np.log2(estimated_arr+1).mean(axis=1)
 #     df = df.set_index('isoform').assign(K_value=pd.Series(kvalues_dict)).reset_index()
 #     return df

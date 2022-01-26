@@ -51,7 +51,7 @@ on_plot_shown_label = {
     'isoform_length': 'Isoform length',
     'true_abund': 'True abundance',
     'log2_true_abund': 'Log2(True abundance+1)',
-    'std': 'std',
+    'COV': 'Coefficient of variation',
     'estimated_abund': 'Estimated abundance',
     'RM': 'RM',
     'RE': 'RE',
@@ -77,9 +77,9 @@ on_plot_shown_label = {
 #     'isoform_length': 'Isoform length',
 #     'true_abund': 'True abundance',
 #     'log2_true_abund': 'Log2(True abundance+1)',
-#     'std': 'std',
+#     'COV': 'COV',
 #     'estimated_abund': 'Estimated abundance',
-#     'RM': 'Reproducibility Measure',
+#     'RM': 'Irreproducibility Measure',
 #     'RE': 'Resolution Entropy',
 #     'ave_estimated_abund':'Log2(Estimated abundance+1)',
 #     'ave_true_abund':'Log2(true_abund+1)',
@@ -110,7 +110,7 @@ multi_sample_diff_condition_table_metrics = [
 
     {'name': 'Consistency Measure', 'id': 'CM','type':'numeric','format':{'specifier':'.3f'}},
     
-    {'name': 'Reproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': 'Irreproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
 
     {'name': 'Precision','id': 'precision','type':'numeric','format':{'specifier':'.3f'}},
     {'name': 'Recall','id': 'recall','type':'numeric','format':{'specifier':'.3f'}},
@@ -120,7 +120,7 @@ multi_sample_diff_condition_table_metrics = [
 ]
 multi_sample_diff_condition_without_ground_truth_table_metrics = [
     {'name': 'Consistency Measure', 'id': 'CM','type':'numeric','format':{'specifier':'.3f'}},
-    {'name': 'Reproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': 'Irreproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
     {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
 ]
 
@@ -138,7 +138,7 @@ single_sample_plot_figures = {
     'Statistics with different numbers of exons':{'x':'num_exons','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     'Statistics with different numbers of isoforms':{'x':'num_isoforms','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
     'Statistics with different expression level':{'x':'log2_true_abund','y':[m['id'] for m in single_sample_table_metrics],'type':'statistics'},
-    # 'Standard deviation vs estimated abundance scatter':{'x':'estimated_abund','y':'std','type':'estimation_error'},
+    # 'coefficient of variation vs estimated abundance scatter':{'x':'estimated_abund','y':'COV','type':'estimation_error'},
 }
 multi_sample_diff_condition_with_ground_truth_plot_figures = {
     'Distribution of K values':{'x':'K_value','y':'dist','type':'gene_features'},
@@ -154,8 +154,8 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     'Resolution Entropy for different conditions':{'x':'','y':'RE','type':'resolution_entropy'},
     
     'Consistency Measure curve':{'x':'C threshold','y':'CM','type':'consistency'},
-    # 'Standard deviation vs estimated abundance scatter':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
-    'Standard deviation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
+    # 'coefficient of variation vs estimated abundance scatter':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
+    'coefficient of variation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
     'ROC curves for performance of quantification':{'x':'fpr','y':'tpr','type':'fold_change'},
     'PR curves for performance of quantification':{'x':'recall','y':'precision','type':'fold_change'},
 
@@ -174,7 +174,7 @@ multi_sample_diff_condition_without_ground_truth_plot_figures = {
     'Distribution of numbers of exons':{'x':'num_exons','y':'dist','type':'gene_features'},
     'Distribution of numbers of isoforms':{'x':'num_isoforms','y':'dist','type':'gene_features'},
 
-    'Standard deviation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['std#1','std#2'],'type':'reproducibility'},
+    'coefficient of variation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
     'Consistency Measure curve':{'x':'C threshold','y':'CM','type':'consistency'},
     'Resolution Entropy for different conditions':{'x':'','y':'RE','type':'resolution_entropy'},
     'Statistics with different K values':{'x':'K_value','y':[m['id'] for m in multi_sample_diff_condition_without_ground_truth_table_metrics],'type':'statistics'},
@@ -207,3 +207,5 @@ K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,5)]
 # condition_number_ranges = [i for i in range(1,22,4)]
 condition_number_ranges = [1,2,3,4,5,6,7,9,12]
 ARR_ranges = [i/10 for i in range(11)]
+condition_1_name = 'Condition 1'
+condition_2_name = 'Condition 2'

@@ -89,7 +89,7 @@ class Single_sample_plotter(Plotter):
         fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True}))
         fig.update_layout(showlegend=False, autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['large_single'])
         fig.update_xaxes(title_text='Log2(Estimated abundance+1)',range=[1,x_max])
-        fig.update_yaxes(title_text='std')
+        fig.update_yaxes(title_text='COV')
         return fig
     def plot_std_curve(self,x_axis_column_name,y_axis_column_name,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
@@ -108,7 +108,7 @@ class Single_sample_plotter(Plotter):
         fig.add_annotation(x=grouped[x_axis_column_name].max()*0.95, y=grouped[y_axis_column_name].max()*0.95,
             text="{:.3f}".format(auc),showarrow=False)
         fig.update_layout(xaxis_title= 'Log2(Estimated abundance+1)',
-            yaxis_title= 'std',autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'],showlegend=False)
+            yaxis_title= 'COV',autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'],showlegend=False)
         return fig
     def plot_corr_box_plot(self,x_axis_column_name,y_axis_column_name,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
@@ -144,7 +144,7 @@ class Single_sample_plotter(Plotter):
             fig = self.plot_grouped_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)
-        elif plot_figure_name in ['Standard deviation vs estimated abundance scatter']:
+        elif plot_figure_name in ['coefficient of variation vs estimated abundance scatter']:
             fig = self.plot_std_scatter(x_axis_column_name, y_axis_column_name, scale)
         elif plot_figure_name == 'Correlation Boxplot of estimated abundance and ground truth':
             fig = self.plot_corr_box_plot(x_axis_column_name,y_axis_column_name,scale)

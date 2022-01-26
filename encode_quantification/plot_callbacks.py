@@ -135,7 +135,7 @@ def download_all_figures(n_clicks, figures, figure_titles):
     return dict(content=content, filename='figures.zip', mime_type='application/zip',base64=True)
 
 # def update_multi_sample_same_condition_graph(plot_df, plot_figure_name, x_axis_column_name, y_axis_column_name, x_axis_transform, y_axis_transform, scale,smoothing):
-#     if plot_figure_name == 'Standard deviation vs estimated abundance scatter':
+#     if plot_figure_name == 'coefficient of variation vs estimated abundance scatter':
 #         fig = plot_scatter(x_axis_column_name, y_axis_column_name,
 #                         x_axis_transform, y_axis_transform, scale, plot_figure_name, plot_df)
 #         return fig

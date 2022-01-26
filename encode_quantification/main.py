@@ -8,13 +8,14 @@ from report_generator.table import generate_table
 from plot_func.multi_method_plotter import Multi_method_plotter
 import pickle
 import pandas as pd
+import static_data
 all_sections = [
     {'name':'Gene features','id':'gene_features','plots':[]},
     {'name':'Methods Legend','id':'method_legend','legend':[]},
     {'name':'Estimation error','id':'estimation_error','plots':[],'table':{}},
     {'name':'Resolution Entropy','id':'resolution_entropy','plots':[],'table':{}},
     {'name':'Consistency','id':'consistency','plots':[]},
-    {'name':'Reproducibility','id':'reproducibility','plots':[]},
+    {'name':'Irreproducibility','id':'Irreproducibility','plots':[]},
     {'name':'Fold change based evaluation','id':'fold_change','plots':[],'table':{}},
     {'name':'Split Statistics','id':'statistics','plots':[]},
 ]
@@ -34,25 +35,25 @@ def generate_output(output,output_path):
     with open(os.path.join(output_path,'Report.html'),'w') as f:
         f.write(output)
     results = []
-    with open('{}/plot.pkl'.format(output_path),'rb') as f:
-        while 1:
-            try:
-                res = pickle.load(f)
-                results.append(res)
-            except:
-                break
-    with open('{}/plot.txt'.format(output_path),'w') as f:
-        for res in results:
-            names = ['','','data','mean','error']
-            for item,name in zip(res,names):
-                if type(item) == pd.DataFrame:
-                    f.write('{}\n'.format(name))
-                    f.write(item.to_csv())
-                    f.write('\n')
-                else:
-                    f.write('{}\n'.format(item))
-            f.write('\n\n')
-    os.remove('{}/plot.pkl'.format(output_path))
+    # with open('{}/plot.pkl'.format(output_path),'rb') as f:
+    #     while 1:
+    #         try:
+    #             res = pickle.load(f)
+    #             results.append(res)
+    #         except:
+    #             break
+    # with open('{}/plot.txt'.format(output_path),'w') as f:
+    #     for res in results:
+    #         names = ['','','data','mean','error']
+    #         for item,name in zip(res,names):
+    #             if type(item) == pd.DataFrame:
+    #                 f.write('{}\n'.format(name))
+    #                 f.write(item.to_csv())
+    #                 f.write('\n')
+    #             else:
+    #                 f.write('{}\n'.format(item))
+    #         f.write('\n\n')
+    # os.remove('{}/plot.pkl'.format(output_path))
 def preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection):
     input_paths = [[quantif_res_path],[annotation_path],[truth_path]]
     if (is_multi_method == False):
@@ -116,6 +117,8 @@ def parse_arguments():
     optional.add_argument('-t','--truth', type=str, help="The path of true expression file [TSV]")
     optional.add_argument('--seq',  type=str,help="Whether long read data given ['LongRead' or 'ShortRead'] [default:ShortRead]",default='ShortRead')
     optional.add_argument('--K_value_selection',  type=str,help="Which K value calculation['Condition_number','K_value','Generalized_condition_number'] [default:Generalized_condition_number]",default='Generalized_condition_number')
+    optional.add_argument('--cond_1_name',  type=str,help="The name of condition 1 replicate",default='Condition 1')
+    optional.add_argument('--cond_2_name',  type=str,help="The name of condition 2 replicate",default='Condition 2')
     # optional = parser.add_argument_group('optional arguments')
     # optional.add_argument('--num_iterations',type=int,default=100, help="Number of iterations for EM algorithm [default:100]")
     
@@ -133,6 +136,8 @@ def parse_arguments():
     is_long_read = True if args.seq == 'LongRead' else False
     if (not ground_truth_given) and (not is_multi_sample):
         raise Exception('No evaluation can be done for single sample data without ground truth!')
+    static_data.condition_1_name = args.cond_1_name
+    static_data.condition_2_name = args.cond_2_name
     render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,args.K_value_selection)
 if __name__ == "__main__":
     parse_arguments()

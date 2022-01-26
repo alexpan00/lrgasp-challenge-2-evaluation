@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
+from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes,condition_1_name,condition_2_name
 from sklearn.metrics import roc_curve,precision_recall_curve,average_precision_score,roc_auc_score
 from preprocess_util import *
 from plot_func.plot_util_multi_method import *
@@ -16,7 +16,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_dist(self,x_axis_column_name, scale):
         return Multi_method_plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name,scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.method_names))):
             plot_df = filter_by_scale(scale, plot_df)
             arr_columns = [x for x in list(plot_df.columns) if 'arr_' in x]
@@ -51,7 +51,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_stats_box(self,y_axis_column_names,scale):
         [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(self.plot_dfs[0],y_axis_column_names)
         col_num = len(cond1_metric_dicts)
-        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,y_axis_column_names)
@@ -71,7 +71,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         return fig
     def plot_resolution_entropy(self,scale):
         col_num = 1
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=['Condition 1','Condition 2'])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
@@ -195,7 +195,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_yaxes(range=[min(y_mins),max(y_maxs)])
         fig.update_layout(
             xaxis_title= 'Log2(Estimated abundance+1)',
-            yaxis_title= 'std',
+            yaxis_title= 'COV',
             width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['small_multi'])
         return fig
     def plot_consistency_measure_curve(self,x_axis_column_names,y_axis_column_names,scale):
@@ -221,7 +221,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             x_range_max.append(C_ranges.max())
             y_range_max.append(max(CM_list))
             fig.update_xaxes(title_text='C threshold',row=row_num, col=col_num)
-            fig.update_yaxes(title_text='Consistency Measure',row=row_num, col=col_num)
+            fig.update_yaxes(title_text='Log2 Consistency Measure',row=row_num, col=col_num)
         y_range_max = [0.2]
         x_range_max = [1000]
         fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*0.85,text='ACMC',showarrow=False)
@@ -280,7 +280,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 x_maxs.append(max(x))
                 y_maxs.append(max(y))
         x_title = 'Log2(Estimated abundance+1)'
-        y_title = 'Std'
+        y_title = 'COV'
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
         fig.update_yaxes(title_text=y_title,range=[0,max(y_maxs)])
         fig.update_layout(autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
@@ -297,7 +297,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         ranges,max_threshold = prepare_ranges(self.plot_dfs[0],x_axis_column_name)
         fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.05, horizontal_spacing=0.05,specs=violin_specs+line_specs)
         #debug
-        f = open('{}/plot.pkl'.format(self.output_path),'ab')
+        # f = open('{}/plot.pkl'.format(self.output_path),'ab')
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
             plot_df = filter_by_scale(scale, plot_df)
             plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name,ranges,max_threshold)
@@ -378,7 +378,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_grouped_violin(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name in ['Correlation of estimated abundance and ground truth']:
             fig = self.plot_corr_scatter(x_axis_column_name, y_axis_column_name, scale)
-        elif plot_figure_name in ['Standard deviation vs estimated abundance scatter']:
+        elif plot_figure_name in ['coefficient of variation vs estimated abundance scatter']:
             fig = self.plot_std_scatter(x_axis_column_name, y_axis_column_name, scale)
         elif y_axis_column_name == 'dist':
             fig = self.plot_dist(x_axis_column_name, scale)
@@ -386,7 +386,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             fig = self.plot_arr(x_axis_column_name, scale)
         elif plot_figure_name == 'Estimation Error for different conditions':
             fig = self.plot_stats_box(y_axis_column_name,scale)
-        elif plot_figure_name == 'Standard deviation vs estimated abundance curve':
+        elif plot_figure_name == 'coefficient of variation vs estimated abundance curve':
             fig = self.plot_multi_sample_std_curve(x_axis_column_name,y_axis_column_name,scale)
         elif plot_figure_name == 'Consistency Measure curve':
             fig = self.plot_consistency_measure_curve(x_axis_column_name,y_axis_column_name,scale)
