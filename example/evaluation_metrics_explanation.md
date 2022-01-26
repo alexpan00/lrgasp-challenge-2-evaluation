@@ -22,8 +22,8 @@ Since quantification performance could be influenced by the exon-isoform structu
 ![K-value](figures/K-value.png)<br>
 K-value is the condition number of the exon-isoform binary matrix, which can be used to measure the complexity of exon-isoform structures for each gene.
 ## Irreproducibility
-![Irreproducibility](figures/Irreproducibility.png)<br>
-By fitting the coefficient of variation versus average isoform abundance into a smooth curve, it can be shown that Method B has a lower coefficient of variation and higher Irreproducibility.
+![Irreproducibility](figures/reproducibility.png)<br>
+By fitting the coefficient of variation versus average isoform abundance into a smooth curve, it can be shown that Method B has a lower coefficient of variation and higher reproducibility.
 ## Consistency
 ![Consistency](figures/consistency.png)<br>
 By setting an expression threshold (e.g., 1 in this toy example), we can define which set of genes express (in blue) or not (in yellow). This statistic is to measure the consistency of the expressed gene sets between replicates. 
