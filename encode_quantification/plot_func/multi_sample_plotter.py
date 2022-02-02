@@ -4,19 +4,19 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes,condition_1_name,condition_2_name
+from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
+import static_data
 from sklearn.metrics import roc_curve,precision_recall_curve,average_precision_score,roc_auc_score
 from preprocess_util import *
 from plot_func.plot_util import *
 from plot_func.plotter import Plotter
-
 class Multi_sample_plotter(Plotter):
     def __init__(self,plot_df,anno_df):
         Plotter.__init__(self,plot_df,anno_df)
     def plot_dist(self,x_axis_column_name, scale):
         return Plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name, scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
         plot_df = filter_by_scale(scale, self.plot_df)
         arr_columns = [x for x in list(plot_df.columns) if 'arr_' in x]
         arr_dfs = []
@@ -53,8 +53,8 @@ class Multi_sample_plotter(Plotter):
         fig = make_subplots(rows=1, cols=col_num,horizontal_spacing=0.1,vertical_spacing=0.1,)
         for i,cond1_metric_dict,cond2_metric_dict in zip(range(col_num),cond1_metric_dicts,cond2_metric_dicts):
             M = on_plot_shown_label[cond1_metric_dict['Metric']]
-            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),name=condition_1_name,showlegend=False,marker_color=color_schemes[0]),row=1,col=i+1)
-            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),name=condition_2_name,showlegend=False,marker_color=color_schemes[1]),row=1,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),name=static_data.condition_1_name,showlegend=False,marker_color=color_schemes[0]),row=1,col=i+1)
+            fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),name=static_data.condition_2_name,showlegend=False,marker_color=color_schemes[1]),row=1,col=i+1)
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             width=fig_size['small_rec']['width']*col_num,
@@ -157,7 +157,7 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_corr_scatter(self,x_axis_column_names, y_axis_column_names, scale):
         plot_df = filter_by_scale(scale, self.plot_df)
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(len(y_axis_column_names))]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         fig = make_subplots(rows=1, cols=len(y_axis_column_names),subplot_titles=subplot_titles)
         # estimated_columns = [x for x in list(plot_df.columns) if 'estimated_abund_' in x]
         # true_columns = [x for x in list(plot_df.columns) if 'true_abund_' in x]
@@ -179,7 +179,7 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_std_scatter(self,x_axis_column_names, y_axis_column_names,  scale):
         plot_df = filter_by_scale(scale,self.plot_df)
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(len(y_axis_column_names))]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         fig = make_subplots(rows=1, cols=len(y_axis_column_names),subplot_titles=subplot_titles)
         colorbars = [dict(len=1.05, x=0.45,y=0.49),dict(len=1.05,  x=1.0 , y=0.49)]
         col_num = 0
@@ -194,7 +194,7 @@ class Multi_sample_plotter(Plotter):
             x_maxs.append(max(x))
             y_maxs.append(max(y))
         x_title = 'Log2(Estimated abundance+1)'
-        y_title = 'COV'
+        y_title = 'Coefficient of variation'
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
         fig.update_yaxes(title_text=y_title,range=[0,max(y_maxs)])
         fig.update_layout(showlegend=False,autosize=False,width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['small_multi'])
@@ -203,7 +203,7 @@ class Multi_sample_plotter(Plotter):
         plot_df = filter_by_scale(scale, self.plot_df)
         n_bins = 1000
         degree = 5
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(len(y_axis_column_names))]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         # fig = make_subplots(cols=len(x_axis_column_names),rows=1,subplot_titles=subplot_titles)
         fig = go.Figure()
         x_mins,y_mins,x_maxs,y_maxs,aucs = [],[],[],[],[]
@@ -223,33 +223,31 @@ class Multi_sample_plotter(Plotter):
             x_maxs.append(grouped[x_axis_column_name].max())
             y_mins.append(grouped[y_axis_column_name].min())
             y_maxs.append(grouped[y_axis_column_name].max())
-        fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*0.85,text='ASDC',showarrow=False)
+        fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*0.85,text='ACVC',showarrow=False)
         for i in range(len(x_axis_column_names)):
             fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*(0.8-i*0.1),
-                text="Condition {}: {:.3f}".format(i+1,aucs[i]),showarrow=False)
+                text="{}: {:.3f}".format([static_data.condition_1_name,static_data.condition_2_name][i],aucs[i]),showarrow=False)
         fig.update_xaxes(range=[min(x_mins),max(x_maxs)])
         fig.update_yaxes(range=[min(y_mins),max(y_maxs)])
         fig.update_layout(
             xaxis_title= 'Log2(Estimated abundance+1)',
-            yaxis_title= 'COV',
-            autosize=False,showlegend=True,width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['large_multi'])
+            yaxis_title= 'Coefficient of variation',
+            autosize=False,showlegend=True,width=fig_size['rec']['width'],height=fig_size['rec']['height'],template= themes['large_multi'])
         return fig
     def plot_consistency_measure_curve(self,x_axis_column_names,y_axis_column_names,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
         CM_list,C_ranges = prepare_consistency_measure_plot_data(plot_df)
         auc = np.trapz(CM_list,C_ranges)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=C_ranges,y=CM_list,mode='lines',name='Log2 consistency Measure'))
-        fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.85,text='ACMC',showarrow=False)
-        fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.84,
-                text="{:.3f}".format(auc),showarrow=False)
+        fig.add_trace(go.Scatter(x=C_ranges,y=CM_list,mode='lines',name='Consistency Measure'))
+        fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*0.85,text='ACC: '+"{:.3f}".format(auc),showarrow=False)
         fig.update_layout(
-            xaxis_title= 'C threshold',
-            yaxis_title= 'Log2 consistency Measure',
-            autosize=False,showlegend=True,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'])
+            xaxis_title= 'Log2 C threshold',
+            yaxis_title= 'Consistency Measure',
+            autosize=False,showlegend=True,width=fig_size['rec']['width'],height=fig_size['rec']['height'],template= themes['small_single'])
         return fig
     def plot_resolution_entropy(self,scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
         plot_df = filter_by_scale(scale, self.plot_df)
         [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,'RE')
         cond1_metric_dicts = [i for i in cond1_metric_dicts if i['Metric'] == 'RE']
@@ -259,7 +257,7 @@ class Multi_sample_plotter(Plotter):
             M = on_plot_shown_label[cond1_metric_dict['Metric']]
             fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),showlegend=False),row=1,col=i+1)
             fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),showlegend=False),row=2,col=i+1)
-        fig.update_traces(showlegend=True,col=1,row=1)
+        fig.update_traces(showlegend=False,col=1,row=1)
         fig.update_layout(
             width=540,
             height=540,
@@ -269,7 +267,7 @@ class Multi_sample_plotter(Plotter):
     def plot_multi_corr_box_plot(self,x_axis_column_names,y_axis_column_names,scale):
         plot_df = filter_by_scale(scale, self.plot_df)
         x_mins,x_maxs,y_mins,y_maxs = [],[],[],[]
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(len(y_axis_column_names))]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         fig = make_subplots(rows=1, cols=len(y_axis_column_names),subplot_titles=subplot_titles)
 
         estimated_columns = [x for x in list(plot_df.columns) if 'estimated_abund_' in x]

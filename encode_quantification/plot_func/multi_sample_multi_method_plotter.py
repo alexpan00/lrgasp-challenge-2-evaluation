@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes,condition_1_name,condition_2_name
+from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,themes
+import static_data
 from sklearn.metrics import roc_curve,precision_recall_curve,average_precision_score,roc_auc_score
 from preprocess_util import *
 from plot_func.plot_util_multi_method import *
@@ -16,7 +17,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_dist(self,x_axis_column_name, scale):
         return Multi_method_plotter.plot_dist(self,x_axis_column_name, scale)
     def plot_arr(self,x_axis_column_name,scale):
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.method_names))):
             plot_df = filter_by_scale(scale, plot_df)
             arr_columns = [x for x in list(plot_df.columns) if 'arr_' in x]
@@ -51,7 +52,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_stats_box(self,y_axis_column_names,scale):
         [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(self.plot_dfs[0],y_axis_column_names)
         col_num = len(cond1_metric_dicts)
-        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
+        fig = make_subplots(rows=2, cols=col_num,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,y_axis_column_names)
@@ -71,7 +72,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         return fig
     def plot_resolution_entropy(self,scale):
         col_num = 1
-        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[condition_1_name,condition_2_name])
+        fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.05,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
         for j,plot_df,method_name in zip(range(len(self.plot_dfs)),self.plot_dfs,self.method_names):
             plot_df = filter_by_scale(scale, plot_df)
             [cond1_metric_dicts,cond2_metric_dicts] = prepare_stats_box_plot_data(plot_df,["RE"])
@@ -137,7 +138,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             fig.add_annotation(x=0.9, y=0.05*(len(self.plot_dfs)-i),text="{} AP: {:.3f}".format(method_name,aps),showarrow=False)
         return fig
     def plot_multi_corr_box_plot(self,x_axis_column_names,y_axis_column_names,scale):
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(2)]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         fig = make_subplots(rows=1, cols=2,subplot_titles=subplot_titles)
         shared_bins_conds = [None,None]
         for plot_df,method_name,i in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
@@ -161,7 +162,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
     def plot_multi_sample_std_curve(self,x_axis_column_names,y_axis_column_names,scale):
         n_bins = 1000
         degree = 5
-        subplot_titles = ['Condition {}'.format(i+1) for i in range(2)]
+        subplot_titles = [static_data.condition_1_name,static_data.condition_2_name]
         fig = make_subplots(cols=2,rows=1,subplot_titles=subplot_titles)
         x_mins,y_mins,x_maxs,y_maxs,aucs = [],[],[],[],[]
         for plot_df,method_name,j in zip(self.plot_dfs,self.method_names,range(len(self.plot_dfs))):
@@ -184,7 +185,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 y_maxs.append(grouped['smoothed_{}'.format(y_axis_column_name)].max())
         x_mins,y_mins = [0],[0]
         x_maxs,y_maxs = [13],[2]
-        fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*0.85,text='ASDC',showarrow=False)
+        fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*0.85,text='ACVC',showarrow=False)
         for i in range(len(aucs)):
             col = i%2+1
             method_index = i//2
@@ -220,11 +221,11 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
             aucs.append(auc)
             x_range_max.append(C_ranges.max())
             y_range_max.append(max(CM_list))
-            fig.update_xaxes(title_text='C threshold',row=row_num, col=col_num)
-            fig.update_yaxes(title_text='Log2 Consistency Measure',row=row_num, col=col_num)
+            fig.update_xaxes(title_text='Log2 C threshold',row=row_num, col=col_num)
+            fig.update_yaxes(title_text='Consistency Measure',row=row_num, col=col_num)
         y_range_max = [0.2]
         x_range_max = [1000]
-        fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*0.85,text='ACMC',showarrow=False)
+        fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*0.85,text='ACC',showarrow=False)
         for auc,method_name,j in zip(aucs,self.method_names,range(len(aucs))):
             fig.add_annotation(x=max(x_range_max)*0.8, y=max(y_range_max)*(0.8-0.1*j),
                 text="{}: {:.3f}".format(method_name,auc),showarrow=False,col=col_num,row=row_num)
@@ -235,7 +236,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         return fig
 
     def plot_corr_scatter(self,x_axis_column_names, y_axis_column_names,scale):
-        subplot_titles = ['{} Condition {}'.format(M,i+1) for i in range(2) for M in self.method_names]
+        subplot_titles = ['{} {}'.format(M,[static_data.condition_1_name,static_data.condition_2_name][i]) for i in range(2) for M in self.method_names]
         fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.05,)
         col_num = 0
         row_num = 0
@@ -260,7 +261,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_layout(showlegend=False,autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
         return fig
     def plot_std_scatter(self,x_axis_column_names, y_axis_column_names,scale):
-        subplot_titles = ['{} Condition {}'.format(M,i+1) for i in range(2) for M in self.method_names]
+        subplot_titles = ['{} {}'.format(M,[static_data.condition_1_name,static_data.condition_2_name][i]) for i in range(2) for M in self.method_names]
         fig = make_subplots(rows=2, cols=len(self.method_names),subplot_titles=subplot_titles,vertical_spacing=0.2, horizontal_spacing=0.05)
         col_num = 0
         row_num = 0

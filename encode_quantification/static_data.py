@@ -98,7 +98,7 @@ single_sample_table_metrics = [
     {'name': 'Median Relative Difference', 'id': 'mrd','type':'numeric','format':{'specifier':'.3f'}},
     {'name':'Mean Abundance Recovery Rate','id':'mean_arr','type':'numeric','format':{'specifier':'.1%'}},
     {'name': "Spearman's rho", 'id': 'spearmanr','type':'numeric','format':{'specifier':'.3f'}},
-    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'e'}},
 ]
 multi_sample_diff_condition_table_metrics = [
     {'name': 'Normalized Root Mean Square Error', 'id': 'nrmse','type':'numeric','format':{'specifier':'.3f'}},
@@ -106,7 +106,7 @@ multi_sample_diff_condition_table_metrics = [
     {'name':'Mean Abundance Recovery Rate','id':'mean_arr','type':'numeric','format':{'specifier':'.1%'}},
     {'name': "Spearman's rho", 'id': 'spearmanr','type':'numeric','format':{'specifier':'.3f'}},
 
-    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'e'}},
 
     {'name': 'Consistency Measure', 'id': 'CM','type':'numeric','format':{'specifier':'.3f'}},
     
@@ -121,7 +121,7 @@ multi_sample_diff_condition_table_metrics = [
 multi_sample_diff_condition_without_ground_truth_table_metrics = [
     {'name': 'Consistency Measure', 'id': 'CM','type':'numeric','format':{'specifier':'.3f'}},
     {'name': 'Irreproducibility Measure', 'id': 'RM','type':'numeric','format':{'specifier':'.3f'}},
-    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'.3f'}},
+    {'name': "Resolution Entropy", 'id': 'RE','type':'numeric','format':{'specifier':'e'}},
 ]
 
 single_sample_plot_figures = {
@@ -155,7 +155,7 @@ multi_sample_diff_condition_with_ground_truth_plot_figures = {
     
     'Consistency Measure curve':{'x':'C threshold','y':'CM','type':'consistency'},
     # 'coefficient of variation vs estimated abundance scatter':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
-    'coefficient of variation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
+    'Coefficient of variation vs estimated abundance curve':{'x':['ave_estimated_abund#1','ave_estimated_abund#2'],'y':['COV#1','COV#2'],'type':'Irreproducibility'},
     'ROC curves for performance of quantification':{'x':'fpr','y':'tpr','type':'fold_change'},
     'PR curves for performance of quantification':{'x':'recall','y':'precision','type':'fold_change'},
 

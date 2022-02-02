@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 from static_data import *
 from preprocess import *
 table_comment = {
-    'consistency':'Consistency Measure (CM) is calculated for C threshold  = 1',
+    'consistency':'Consistency Measure (CM) is calculated for log2 C threshold  = 1',
     # 'consistency':'Resolution Entropy (RE) is calculated by the',
     'Irreproducibility':'Irreproducibility Measure (RM) is calculated by the L2 norm of the coefficient of variation',
 }

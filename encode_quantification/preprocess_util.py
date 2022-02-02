@@ -256,7 +256,8 @@ def prepare_consistency_measure_plot_data(df):
     n_bins = 1000
     _,C_ranges = pd.cut(estimated_arr.flatten(), n_bins, retbins=True,include_lowest=True)
     C_ranges[0] = 1
-    CM_list = [np.log2(get_consistency_measures(estimated_arr,K)) for K in C_ranges]
+    C_ranges = np.log2(C_ranges+1)
+    CM_list = [get_consistency_measures(estimated_arr,K) for K in C_ranges]
     return CM_list,C_ranges
 def prepare_corr_box_plot_data(estimated_arr,true_expression_arr,shared_bins=None):
     n_bins = 4
