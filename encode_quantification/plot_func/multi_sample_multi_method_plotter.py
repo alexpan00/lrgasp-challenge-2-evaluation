@@ -153,8 +153,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 df,shared_bins_conds[col-1] = prepare_corr_box_plot_data(df['estimated_abund'], df['true_abund'],shared_bins_conds[col-1])
                 fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund'],name=method_name,marker_color=color_schemes[i],showlegend=False),col=col,row=1)
             # fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund'],boxpoints='all',jitter=0.3),col=col,row=1)
-        fig.update_xaxes(title_text='Log2(True abundance+1)')
-        fig.update_yaxes(title_text='Log2(Estimated abundance+1)')
+        fig.update_xaxes(title_text='Log2(True TPM+1)')
+        fig.update_yaxes(title_text='Log2(Estimated TPM+1)')
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             autosize=False,width=fig_size['square']['width']*2,height=fig_size['square']['height'],boxmode='group',template= themes['large_multi'])
@@ -195,7 +195,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_xaxes(range=[min(x_mins),max(x_maxs)])
         fig.update_yaxes(range=[min(y_mins),max(y_maxs)])
         fig.update_layout(
-            xaxis_title= 'Log2(Estimated abundance+1)',
+            xaxis_title= 'Log2(Estimated TPM+1)',
             yaxis_title= 'COV',
             width=fig_size['square']['width']*2,height=fig_size['square']['height'],template= themes['small_multi'])
         return fig
@@ -254,8 +254,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True}),row=row_num, col=col_num)
                 x_maxs.append(max(x))
                 y_maxs.append(max(y))
-        x_title = 'Log2(True abundance+1)'
-        y_title = 'Log2(Estimated abundance+1)'
+        x_title = 'Log2(True TPM+1)'
+        y_title = 'Log2(Estimated TPM+1)'
         fig.update_xaxes(title_text=x_title,range=[0,max(x_maxs+y_maxs)])
         fig.update_yaxes(title_text=y_title,range=[0,max(x_maxs+y_maxs)])
         fig.update_layout(showlegend=False,autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
@@ -280,7 +280,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 fig.update_layout(showlegend=False)
                 x_maxs.append(max(x))
                 y_maxs.append(max(y))
-        x_title = 'Log2(Estimated abundance+1)'
+        x_title = 'Log2(Estimated TPM+1)'
         y_title = 'COV'
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
         fig.update_yaxes(title_text=y_title,range=[0,max(y_maxs)])

@@ -75,8 +75,8 @@ class Single_sample_plotter(Plotter):
         fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis')))
         fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True}))
         fig.update_layout(showlegend=False, autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['large_single'])
-        fig.update_xaxes(title_text='Log2(True abundance+1)',range=[1,max(x_max,y_max)])
-        fig.update_yaxes(title_text='Log2(Estimated abundance+1)',range=[1,max(x_max,y_max)])
+        fig.update_xaxes(title_text='Log2(True TPM+1)',range=[1,max(x_max,y_max)])
+        fig.update_yaxes(title_text='Log2(Estimated TPM+1)',range=[1,max(x_max,y_max)])
         return fig
     def plot_std_scatter(self,x_axis_column_name, y_axis_column_name, scale):
         plot_df = filter_by_scale(scale, self.plot_df)
@@ -88,7 +88,7 @@ class Single_sample_plotter(Plotter):
         fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis')))
         fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True}))
         fig.update_layout(showlegend=False, autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['large_single'])
-        fig.update_xaxes(title_text='Log2(Estimated abundance+1)',range=[1,x_max])
+        fig.update_xaxes(title_text='Log2(Estimated TPM+1)',range=[1,x_max])
         fig.update_yaxes(title_text='COV')
         return fig
     def plot_std_curve(self,x_axis_column_name,y_axis_column_name,scale):
@@ -107,7 +107,7 @@ class Single_sample_plotter(Plotter):
         auc = np.trapz(grouped['smoothed_{}'.format(y_axis_column_name)],grouped[x_axis_column_name])
         fig.add_annotation(x=grouped[x_axis_column_name].max()*0.95, y=grouped[y_axis_column_name].max()*0.95,
             text="{:.3f}".format(auc),showarrow=False)
-        fig.update_layout(xaxis_title= 'Log2(Estimated abundance+1)',
+        fig.update_layout(xaxis_title= 'Log2(Estimated TPM+1)',
             yaxis_title= 'COV',autosize=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'],showlegend=False)
         return fig
     def plot_corr_box_plot(self,x_axis_column_name,y_axis_column_name,scale):
@@ -118,8 +118,8 @@ class Single_sample_plotter(Plotter):
         # fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund'],boxpoints='all',jitter=0.3))
         fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund']))
         fig.update_layout(
-            xaxis_title= 'Log2(True abundance+1)',
-            yaxis_title= 'Log2(Estimated abundance+1)',
+            xaxis_title= 'Log2(True TPM+1)',
+            yaxis_title= 'Log2(Estimated TPM+1)',
             autosize=False,showlegend=False,width=fig_size['square']['width'],height=fig_size['square']['height'],template= themes['small_single'])
         return fig
 

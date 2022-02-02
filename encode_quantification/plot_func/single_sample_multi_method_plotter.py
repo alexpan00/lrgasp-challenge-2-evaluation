@@ -58,8 +58,8 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             x,y,density = get_density(x,y)
             fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis'),showlegend=False), col=i+1,row=1)
             fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True},showlegend=False),  col=i+1,row=1)
-        x_title = 'Log2(True abundance+1)'
-        y_title = 'Log2(Estimated abundance+1)'
+        x_title = 'Log2(True TPM+1)'
+        y_title = 'Log2(Estimated TPM+1)'
         fig.update_layout(autosize=False,width=fig_size['square']['width']*len(self.plot_dfs),height=fig_size['square']['height'],template=themes['medium_multi'])
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs+y_maxs)])
         fig.update_yaxes(title_text=y_title,range=[1, max(x_maxs+y_maxs)])
@@ -77,7 +77,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             x,y,density = get_density(x,y)
             fig.add_trace(go.Scattergl(x=x, y=y, mode='markers', name='Value',marker=dict(size=5,color=density,colorscale='viridis'),showlegend=False), col=i+1,row=1)
             fig.add_trace(go.Histogram2dContour(x=x, y=y, name='Density',contours={'coloring':'none','showlabels':True},showlegend=False),  col=i+1,row=1)
-        x_title = 'Log2(Estimated abundance+1)'
+        x_title = 'Log2(Estimated TPM+1)'
         y_title = 'COV'
         fig.update_layout(autosize=False,width=fig_size['small_square']['width']*len(self.plot_dfs),height=fig_size['small_square']['height'],template=themes['large_single'])
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
@@ -152,8 +152,8 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
             # plot_df = plot_df[(np.log2(plot_df[x_axis_column_name]+1) >=1) &  (np.log2(plot_df[y_axis_column_name]+1) >= 1)]
             df,shared_bins_cond = prepare_corr_box_plot_data(np.log2(plot_df[y_axis_column_name]+1),np.log2(plot_df[x_axis_column_name]+1),shared_bins_cond)
             fig.add_trace(go.Box(x=df['true_abund'],y=df['estimated_abund'],name=method_name),col=1,row=1)
-        fig.update_xaxes(title_text='Log2(True abundance+1)')
-        fig.update_yaxes(title_text='Log2(Estimated abundance+1)')
+        fig.update_xaxes(title_text='Log2(True TPM+1)')
+        fig.update_yaxes(title_text='Log2(Estimated TPM+1)')
         fig.update_layout(boxmode = "group",
             autosize=False,showlegend=True,width=fig_size['square']['width'],height=fig_size['square']['height'],template=themes['large_single'])
         return fig
