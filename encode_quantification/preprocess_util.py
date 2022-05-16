@@ -4,9 +4,11 @@ import pandas as pd
 from itertools import combinations
 from sklearn.metrics import precision_score,recall_score,accuracy_score,roc_auc_score,f1_score,roc_curve,precision_recall_curve
 from static_data import *
+import static_data
 import pickle
 def normalize(arr):
-    return arr
+    # return arr
+    return (arr/arr.sum())*1e6
     # return arr/arr.sum()
 def get_consistency_measures(abund_arr,K):
     condition_column_split_index = abund_arr.shape[1]//2
@@ -15,28 +17,44 @@ def get_consistency_measures(abund_arr,K):
         for i, j in combinations(range(abund_arr.shape[1]), 2):
             arr_lst.append((((abund_arr[:,i]<=K) & (abund_arr[:,j]<=K)) | ((abund_arr[:,i]>K) & (abund_arr[:,j]>K))))
     return np.vstack(arr_lst).mean()
+def get_consistency_measures_per_cond(abund_arr,K,cond='cond1'):
+    condition_column_split_index = abund_arr.shape[1]//2
+    arr_lst = []
+    if cond == 'cond1':
+        abund_arr = abund_arr[:,:condition_column_split_index]
+    else:
+        abund_arr = abund_arr[:,condition_column_split_index:]
+    for i, j in combinations(range(abund_arr.shape[1]), 2):
+        arr_lst.append((((abund_arr[:,i]<=K) & (abund_arr[:,j]<=K)) | ((abund_arr[:,i]>K) & (abund_arr[:,j]>K))))
+    return np.vstack(arr_lst).mean()
 def get_resolution_entropy(abund_arr,I):
     df = pd.DataFrame({'abund':abund_arr}).dropna()
     df['group_range'] = pd.cut(df['abund'],I)
     P = df.groupby('group_range').count()['abund'].values / abund_arr.shape[0]
     P = P[P != 0]
-    RE = -np.median(np.log(P)*P)
+    RE = -np.mean(np.log(P)*P)
     return RE
 def get_single_sample_metric(metric,ground_truth, estimated,df=None):
     if metric == 'spearmanr':
+        ground_truth = np.log2(ground_truth+1)
+        estimated = np.log2(estimated+1)
         if (ground_truth.shape[0] == 1):
             return 1 if ground_truth.values[0] == estimated.values[0] else 0
         else:
             return stats.spearmanr(ground_truth, estimated).correlation
     elif metric == 'nrmse':
-        if (np.std(ground_truth, axis=0) == 0):
-            return np.median(np.square(estimated-ground_truth),axis=0)
+        ground_truth = np.log2(ground_truth+1)
+        estimated = np.log2(estimated+1)
+        if (ground_truth.shape[0] == 1):
+            return np.float('nan')
+        if np.all(ground_truth == ground_truth.values[0]):
+            return np.float('nan')
         else:
-            return np.median(np.square(estimated-ground_truth),axis=0) / np.std(ground_truth, axis=0)
+            return np.sqrt(np.mean(np.square(estimated-ground_truth),axis=0)) / np.std(ground_truth, axis=0)
     elif metric == 'mrd':
-        non_zero_truth = ground_truth.copy()
-        non_zero_truth[non_zero_truth==0] = 1
-        mrd = np.abs(ground_truth - estimated) / non_zero_truth
+        ground_truth = np.log2(ground_truth+1)
+        estimated = np.log2(estimated+1)
+        mrd = np.abs(ground_truth - estimated) / ground_truth
         return np.median(mrd)
         # if (np.count_nonzero(np.linalg.norm(ground_truth)) == 0):
         #     return np.mean(np.linalg.norm(estimated-ground_truth))
@@ -44,6 +62,12 @@ def get_single_sample_metric(metric,ground_truth, estimated,df=None):
     elif metric == 'RE':
         return get_resolution_entropy(estimated,100)
     elif metric == 'mean_arr':
+        try:
+            mean_arr = np.mean(df['arr'])
+            return mean_arr
+        except:
+            return 0
+    elif metric == 'median_arr':
         try:
             mean_arr = np.median(df['arr'])
             return mean_arr
@@ -83,51 +107,92 @@ def get_multi_sample_metric(metric,df,ground_truth, estimated):
         else:
             return stats.spearmanr(ground_truth, estimated,axis=None).correlation
     elif metric == 'nrmse':
-        return np.median(np.median(np.square(estimated-ground_truth),axis=0) / np.std(ground_truth, axis=0))
+        return np.mean(np.sqrt(np.mean(np.square(estimated-ground_truth),axis=0)) / np.std(ground_truth, axis=0))
     elif metric == 'mrd':
         ground_truth = np.mean(ground_truth,axis=1)
         estimated = np.mean(estimated,axis=1)
-        non_zero_truth = ground_truth.copy()
-        non_zero_truth += 0.01
+        # non_zero_truth = ground_truth.copy()
+        # non_zero_truth += 0.01
         # non_zero_truth[non_zero_truth==0] = 1
-        mrd = np.abs(ground_truth - estimated) / non_zero_truth
-        return np.mean(mrd)
+        mrd = np.abs(ground_truth - estimated) / ground_truth
+        return np.median(mrd)
         # if (np.count_nonzero(np.linalg.norm(ground_truth)) == 0):
         #     return np.mean(np.linalg.norm(estimated-ground_truth))
         # return  np.mean(np.linalg.norm(estimated-ground_truth) / np.linalg.norm(ground_truth))
     elif metric =='CM':
         # return get_consistency_measures(estimated,np.median(estimated))
         return get_consistency_measures(estimated,1)
+    elif metric == 'CM_cond1':
+        return get_consistency_measures_per_cond(estimated,1,'cond1')
+    elif metric == 'CM_cond2':
+        return get_consistency_measures_per_cond(estimated,1,'cond2')
     elif metric == 'RM':
         std_1,std_2 = df['COV#1'].values,df['COV#2'].values
         return np.sqrt(np.mean([np.square(std_1),np.square(std_2)]))
+    elif metric == 'RM_cond1':
+        std_1,std_2 = df['COV#1'].values,df['COV#2'].values
+        return np.sqrt(np.mean(np.square(std_1)))
+    elif metric == 'RM_cond2':
+        std_1,std_2 = df['COV#1'].values,df['COV#2'].values
+        return np.sqrt(np.mean(np.square(std_2)))
     elif metric == 'RE':
-        return np.median([get_resolution_entropy(estimated[:,i],100) for i in range(estimated.shape[1])])
+        return np.mean([get_resolution_entropy(estimated[:,i],100) for i in range(estimated.shape[1])])
+    elif metric == 'RE_cond1':
+        condition_column_split_index = estimated.shape[1]//2
+        return np.mean([get_resolution_entropy(estimated[:,i],100) for i in range(0,condition_column_split_index)])
+    elif metric == 'RE_cond2':
+        condition_column_split_index = estimated.shape[1]//2
+        return np.mean([get_resolution_entropy(estimated[:,i],100) for i in range(condition_column_split_index,estimated.shape[1])])
     elif metric == 'mean_arr':
+        arr_columns = [x for x in list(df.columns) if 'arr_' in x]
+        return np.mean(df[arr_columns].values)
+    elif metric == 'median_arr':
         arr_columns = [x for x in list(df.columns) if 'arr_' in x]
         return np.median(df[arr_columns].values)
 def preprocess_single_sample_util(df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict,num_isoforms_dict):
-
-    df['estimated_abund'] = normalize(df['estimated_abund'])
-    df['true_abund'] = normalize(df['true_abund'])
-    df['COV'] = (df['true_abund'] - df['estimated_abund']) / ((df['true_abund'] + df['estimated_abund'])/2)
-    df['arr'] = df['estimated_abund'] / df['true_abund']
+    if static_data.normalize:
+        df['estimated_abund'] = normalize(df['estimated_abund'])
+        df['true_abund'] = normalize(df['true_abund'])
+    if static_data.low_thres == 0:
+        df = df[df['true_abund'] > static_data.low_thres]
+    else:
+        df = df[df['true_abund'] >= static_data.low_thres]
+    df['COV'] = np.abs(df['true_abund'] - df['estimated_abund']) / ((df['true_abund'] + df['estimated_abund'])/2)
+    df['arr'] = np.log2(df['estimated_abund']+1) / np.log2(df['true_abund']+1)
     df.loc[np.isinf(df['arr']),'arr'] = 0
     df['log2_true_abund'] = np.log2(df['true_abund']+1)
-    df = df[df['true_abund'] > 0.5]
+    # df = df[df['true_abund'] > 0.5]
     df = df.set_index('isoform').assign(K_value=pd.Series(kvalues_dict),num_exons=pd.Series(num_exon_dict),isoform_length=pd.Series(isoform_length_dict),gene=pd.Series(isoform_gene_dict),num_isoforms=pd.Series(num_isoforms_dict)).reset_index()
     df = df.dropna()
     return df
 def preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict,num_isoforms_dict):
+    # estimated_df = estimated_df.drop(0,axis=1)
     condition_column_split_index = estimated_df.shape[1]//2
-    estimated_arr = estimated_df.drop(0,axis=1).to_numpy()
-    estimated_arr = normalize(estimated_arr)
-    df = pd.DataFrame()
-    df['isoform'] = estimated_df[0]
-    df = df.set_index('isoform').assign(K_value=pd.Series(kvalues_dict),num_exons=pd.Series(num_exon_dict),isoform_length=pd.Series(isoform_length_dict),gene=pd.Series(isoform_gene_dict),num_isoforms=pd.Series(num_isoforms_dict)).reset_index()
-    df['COV'] = np.std(np.log2(estimated_arr+1),axis=1)/(np.mean(np.log2(estimated_arr+1),axis=1) + 0.01)
-    df['COV#1'] = np.std(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1)/(np.mean(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1) + 0.01)
-    df['COV#2'] = np.std(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1)/(np.mean(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1) + 0.01)
+    cols_cond1 = estimated_df.columns[1:condition_column_split_index+1]
+    cols_cond2 = estimated_df.columns[condition_column_split_index+1:]
+    # print(estimated_df)
+    if static_data.low_thres == 0:
+        estimated_df = estimated_df[(estimated_df[cols_cond1].mean(axis=1) > static_data.low_thres)|(estimated_df[cols_cond2].mean(axis=1) > static_data.low_thres)]
+    else:
+        estimated_df = estimated_df[(estimated_df[cols_cond1].mean(axis=1) >= static_data.low_thres)|(estimated_df[cols_cond2].mean(axis=1) >= static_data.low_thres)]
+
+    # isoform_series = estimated_df[0]
+    estimated_df = estimated_df.set_index(0)
+    estimated_df.index.name = 'isoform'
+    estimated_df = estimated_df.add_prefix('estimated_abund_')
+    estimated_arr = estimated_df.values
+    df = estimated_df.reset_index()
+    # df = df.set_index('isoform')
+    # .assign(K_value=pd.Series(kvalues_dict),num_exons=pd.Series(num_exon_dict),isoform_length=pd.Series(isoform_length_dict),gene=pd.Series(isoform_gene_dict),num_isoforms=pd.Series(num_isoforms_dict)).reset_index()
+    df['COV'] = np.std(np.log2(estimated_arr+1),axis=1)/(np.mean(np.log2(estimated_arr+1),axis=1))
+    std_cond1 = np.std(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1)
+    mean_cond1 = (np.mean(np.log2(estimated_arr[:,:condition_column_split_index]+1),axis=1))
+    mean_cond1[mean_cond1==0] = 1
+    std_cond2 = np.std(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1)
+    mean_cond2 = (np.mean(np.log2(estimated_arr[:,condition_column_split_index:]+1),axis=1))
+    mean_cond2[mean_cond2==0] = 1
+    df['COV#1'] = std_cond1/mean_cond1
+    df['COV#2'] = std_cond2/mean_cond2
     # df['COV'] = np.std(estimated_arr+1,axis=1)
     # df['COV#1'] = np.std(estimated_arr[:,:condition_column_split_index]+1,axis=1)
     # df['COV#2'] = np.std(estimated_arr[:,condition_column_split_index:]+1,axis=1)
@@ -141,10 +206,12 @@ def preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df,
     # df['alfc'] = np.log2(np.log2(estimated_arr[:,condition_column_split_index:] + 0.01).mean(axis=1)/(np.log2(estimated_arr[:,:condition_column_split_index] + 1).mean(axis=1)))
     # df['estimation_diff_expressed'] = df['alfc'] > np.quantile(df['alfc'],0.5)
     df['estimation_diff_expressed'] = df['alfc'] >= 1
-    df  = pd.concat((df,pd.DataFrame(estimated_arr).add_prefix('estimated_abund_')),axis=1)
+    # print(pd.DataFrame(estimated_arr).add_prefix('estimated_abund_'))
+    df = df.set_index('isoform')
+    # print(df)
     if (true_expression_df is not None):
         true_expression_arr = true_expression_df.drop(0,axis=1).to_numpy()
-        true_expression_arr = normalize(true_expression_arr)
+        true_expression_arr = true_expression_arr
         # selected_index = (true_expression_arr >= 0.1).any(axis=1)
         # true_expression_arr = true_expression_arr[selected_index]
         # df = df[selected_index]
@@ -178,7 +245,18 @@ def preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df,
         # df = df[(df['ave_true_abund#1']>np.log2(1.5)) & (df['ave_true_abund#2']>np.log2(1.5))]
         # df = df[(df['ave_true_abund#1']>np.log2(2)) | (df['ave_true_abund#2']>np.log2(2))]
         # df = df[(df['ave_true_abund#1']>5) & (df['ave_true_abund#2']>5)]
-    df = df.dropna()
+    # print(pd.Series(kvalues_dict).shape)
+    anno_df = pd.DataFrame({'K_value':pd.Series(kvalues_dict),"num_exons":pd.Series(num_exon_dict),"isoform_length":pd.Series(isoform_length_dict),"gene":pd.Series(isoform_gene_dict),"num_isoforms":pd.Series(num_isoforms_dict)})
+    df = df.join(anno_df,how='inner')
+    # df.to_csv('/fs/project/PCON0009/Au-scratch2/haoran/lrgasp/SR_reports/jobs/df.tsv',sep='\t')
+    # print(df)
+    # df = df.fillna(0)
+    # df = df.dropna()
+    # df.to_csv(f'{static_data.output_dir}/df.tsv',sep='\t')
+    # print(df.shape)
+    # df = df.dropna()
+    # print(df)
+    # df = df.dropna()
     return df
 def prepare_single_sample_table_metrics(ground_truth, estimated,df):
     metrics = {}
@@ -206,16 +284,16 @@ def prepare_grouped_violin_data(metric,df):
     true_columns = [x for x in list(df.columns) if 'true_abund_' in x]
     if metric in ['precision','recall','accuracy','auc','f1']:
         return  get_multi_sample_metric(metric,df,df[true_columns].to_numpy(),df[estimated_columns].to_numpy())
-    if metric in ['CM','RM','RE']:
+    if metric in ['CM','RM','RE','CM_cond1','RM_cond1','RE_cond1','CM_cond2','RM_cond2','RE_cond2']:
         return  get_multi_sample_metric(metric,df,None,df[estimated_columns].to_numpy())
     all_samples_metric = []
     for i in range(len(estimated_columns)):
         if metric in ['nrmse','mrd','spearmanr']:
             temp = get_single_sample_metric(metric,df[true_columns[i]], df[estimated_columns[i]],df=df)
             all_samples_metric.append(temp)
-        elif metric in ['mean_arr']:
+        elif metric in ['mean_arr','median_arr']:
             arr_columns = [x for x in list(df.columns) if 'arr_' in x]
-            temp = df[arr_columns[i]].mean()
+            temp = df[arr_columns[i]].median()
             all_samples_metric.append(temp)
     return np.array(all_samples_metric)
 def prepare_stats_box_plot_data(df,y_axis_names):
@@ -252,12 +330,34 @@ def prepare_stats_box_plot_data(df,y_axis_names):
     return all_cond_metric_dicts
 def prepare_consistency_measure_plot_data(df):
     estimated_columns = [x for x in list(df.columns) if 'estimated_abund_' in x]
-    estimated_arr = df[estimated_columns].to_numpy()
-    n_bins = 1000
-    _,C_ranges = pd.cut(estimated_arr.flatten(), n_bins, retbins=True,include_lowest=True)
-    C_ranges[0] = 1
-    C_ranges = np.log2(C_ranges+1)
+    estimated_arr = np.log2(df[estimated_columns].to_numpy()+1)
+    max_log_expr = 10
+    min_log_expr = 0
+    bin_size = 0.1
+    n_bins = (max_log_expr - min_log_expr)//bin_size
+    bins = [min_log_expr + (max_log_expr-min_log_expr)/n_bins * i for i in range(int(n_bins))]
+    C_ranges = bins
+    # _,C_ranges = pd.cut(mean_estimated_arr, bins, retbins=True,include_lowest=True)
+    # C_ranges = np.log2(C_ranges+1)
     CM_list = [get_consistency_measures(estimated_arr,K) for K in C_ranges]
+    return CM_list,C_ranges
+def prepare_consistency_measure_plot_data_per_cond(df,cond='cond1'):
+    estimated_columns = [x for x in list(df.columns) if 'estimated_abund_' in x]
+    # condition_column_split_index = len(estimated_columns)//2
+    # if cond == 'cond1':
+    #     estimated_arr = df[estimated_columns[:condition_column_split_index]].to_numpy()
+    # elif cond == 'cond2':
+    #     estimated_arr = df[estimated_columns[condition_column_split_index:]].to_numpy()
+    max_log_expr = 10
+    min_log_expr = 0
+    bin_size = 0.1
+    n_bins = int((max_log_expr - min_log_expr)//bin_size)
+    bins = [min_log_expr + (max_log_expr-min_log_expr)/n_bins * i for i in range(n_bins)]
+    C_ranges = bins
+    # _,C_ranges = pd.cut(mean_estimated_arr, bins, retbins=True,include_lowest=True)
+    # C_ranges = np.log2(C_ranges+1)
+    estimated_arr = np.log2(df[estimated_columns].to_numpy()+1)
+    CM_list = [get_consistency_measures_per_cond(estimated_arr,K,cond) for K in C_ranges]
     return CM_list,C_ranges
 def prepare_corr_box_plot_data(estimated_arr,true_expression_arr,shared_bins=None):
     n_bins = 4

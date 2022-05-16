@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import math
 
-from static_data import num_isoforms_range,num_exons_range, condition_number_ranges, ARR_ranges, on_plot_shown_label, fig_size, color_schemes, themes
+from static_data import *
 from preprocess_util import *
 
 
@@ -100,12 +100,11 @@ def get_k_val_dist(plot_df, groupby):
                     vals.append(float('inf'))
             return pd.Series(vals)
         ranges = num_isoforms_range
-        cutted = pd.cut(
-        plot_df[groupby], ranges, right=False)
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
         categories = cutted.cat.categories
         plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
-        plot_df.loc[plot_df[groupby] >= ranges[-1],
-                    'group_range'] = '>={}'.format(ranges[-1])
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
         plot_df.loc[plot_df['group_range'] == str(
             categories[0]), 'group_range'] = '[{}, {})'.format(int(ranges[0]), int(categories[0].right))
         # Only cut 80% of data and leave 20% together
@@ -187,7 +186,7 @@ def get_group_range(plot_df, groupby):
                     'group_range'] = '<={:.0%}'.format(ranges[1])
         plot_df = plot_df.dropna()
         return plot_df, custom_sort
-    elif groupby in ['ave_true_abund', 'log2_true_abund']:
+    elif groupby in ['true_abund','ave_true_abund', 'log2_true_abund','ave_estimated_abund#1','ave_estimated_abund#2']:
         def custom_sort(col):
             vals = []
             for val in col.tolist():
@@ -197,19 +196,33 @@ def get_group_range(plot_df, groupby):
                     # vals.append(float(val[1:]))
                     vals.append(float('inf'))
             return pd.Series(vals)
-        n_bins = 6
-        plot_df = plot_df[plot_df[groupby] >= 0]
-        max_threshold = np.percentile(plot_df[groupby], 99)
-        cutted = pd.cut(plot_df[groupby][plot_df[groupby]
-                        < max_threshold], bins=n_bins-1)
+        ranges = abund_range
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
         categories = cutted.cat.categories
-        plot_df.loc[plot_df[groupby] < max_threshold,
-            'group_range'] = cutted.astype('str')
-        plot_df.loc[plot_df[groupby] <= categories[0].right+0.001,
-            'group_range'] = '[0, {}]'.format(categories[0].right)
+        plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
 
-        plot_df.loc[plot_df[groupby] > categories[-1].right - 0.001,
-            'group_range'] = '>{:.3f}'.format(categories[-1].right)
+        # qcutted = pd.qcut(plot_df[groupby], 9,duplicates='drop')
+        # categories = qcutted.cat.categories
+        # qcutted_str = qcutted.astype(str)
+        # # qcutted_str[qcutted_str == str(categories[0])] = '(1, {}]'.format(categories[0].right)
+        # plot_df['group_range'] = qcutted_str
+        plot_df = plot_df[plot_df['group_range'] != 'nan']
+        # n_bins = 6
+        # plot_df = plot_df[plot_df[groupby] >= 0]
+        # max_threshold = np.percentile(plot_df[groupby], 99)
+        # cutted = pd.cut(plot_df[groupby][plot_df[groupby]
+        #                 < max_threshold], bins=n_bins-1)
+        # categories = cutted.cat.categories
+        # plot_df.loc[plot_df[groupby] < max_threshold,
+        #     'group_range'] = cutted.astype('str')
+        # plot_df.loc[plot_df[groupby] <= categories[0].right+0.001,
+        #     'group_range'] = '[0, {}]'.format(categories[0].right)
+
+        # plot_df.loc[plot_df[groupby] > categories[-1].right - 0.001,
+        #     'group_range'] = '>{:.3f}'.format(categories[-1].right)
         return plot_df, custom_sort
     elif groupby in ['isoform_length']:
         def custom_sort(col):
@@ -221,27 +234,35 @@ def get_group_range(plot_df, groupby):
                     # vals.append(float(val[1:]))
                     vals.append(float('inf'))
             return pd.Series(vals)
-        plot_df[groupby] = plot_df[groupby].astype(int)
-        plot_df = plot_df.dropna()
-        if plot_df[groupby].max() > 3000:
-            max_threshold = 4000
-            lower, higher = int(plot_df[groupby].min()), 4000
-            step_size = 400
-        else:
-            max_threshold = 2100
-            lower, higher = int(plot_df[groupby].min()), 2100
-            step_size = 200
-        # # max_threshold = np.ceil(np.percentile(plot_df[groupby], 80))
-        # # lower, higher = int(plot_df.min()), int(plot_df.max())
-        # # step_size = int(math.ceil((higher - lower)/n_bins))
-        n_bins = 10
-        edges = [lower] + list(
-            range(step_size, higher+1, step_size))
-        plot_df.loc[plot_df[groupby] <= max_threshold, 'group_range'] = pd.cut(
-            plot_df.loc[plot_df[groupby] <= max_threshold, groupby], bins=edges).apply(lambda x: str(pd.Interval(left=int(round(x.left)), right=int(round(x.right)))) if x is not None else 'nan').astype(str)
-        plot_df.loc[plot_df[groupby] > max_threshold,
-                    'group_range'] = '>{}'.format(max_threshold)
+        ranges = isoform_length_ranges
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        categories = cutted.cat.categories
+        plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
+        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
         plot_df = plot_df[plot_df['group_range'] != 'nan']
+        # plot_df[groupby] = plot_df[groupby].astype(int)
+        # plot_df = plot_df.dropna()
+        # if plot_df[groupby].max() > 3000:
+        #     max_threshold = 4000
+        #     lower, higher = int(plot_df[groupby].min()), 4000
+        #     step_size = 400
+        # else:
+        #     max_threshold = 2100
+        #     lower, higher = int(plot_df[groupby].min()), 2100
+        #     step_size = 200
+        # # # max_threshold = np.ceil(np.percentile(plot_df[groupby], 80))
+        # # # lower, higher = int(plot_df.min()), int(plot_df.max())
+        # # # step_size = int(math.ceil((higher - lower)/n_bins))
+        # n_bins = 10
+        # edges = [lower] + list(
+        #     range(step_size, higher+1, step_size))
+        # plot_df.loc[plot_df[groupby] <= max_threshold, 'group_range'] = pd.cut(
+        #     plot_df.loc[plot_df[groupby] <= max_threshold, groupby], bins=edges).apply(lambda x: str(pd.Interval(left=int(round(x.left)), right=int(round(x.right)))) if x is not None else 'nan').astype(str)
+        # plot_df.loc[plot_df[groupby] > max_threshold,
+        #             'group_range'] = '>{}'.format(max_threshold)
+        # plot_df = plot_df[plot_df['group_range'] != 'nan']
         return plot_df, custom_sort
     elif groupby in ['num_exons','num_isoforms']:
         def custom_sort(col):
@@ -257,14 +278,14 @@ def get_group_range(plot_df, groupby):
             ranges = num_exons_range
         else:
             ranges = num_isoforms_range
-        cutted = pd.cut(
-        plot_df[groupby], ranges, right=False)
+        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
         categories = cutted.cat.categories
         plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
-        plot_df.loc[plot_df[groupby] >= ranges[-1],
-                    'group_range'] = '>={}'.format(ranges[-1])
+        plot_df.loc[plot_df[groupby] > ranges[-1],
+                    'group_range'] = '>{}'.format(ranges[-1])
         plot_df.loc[plot_df['group_range'] == str(
-            categories[0]), 'group_range'] = '[{}, {})'.format(int(ranges[0]), int(categories[0].right))
+            categories[0]), 'group_range'] = '[{}, {}]'.format(int(ranges[0]), int(categories[0].right))
+        plot_df = plot_df[plot_df['group_range'] != 'nan']
         return plot_df, custom_sort
     else:
         def custom_sort(col):

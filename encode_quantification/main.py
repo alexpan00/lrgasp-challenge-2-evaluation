@@ -119,6 +119,8 @@ def parse_arguments():
     optional.add_argument('--K_value_selection',  type=str,help="Which K value calculation['Condition_number','K_value','Generalized_condition_number'] [default:Generalized_condition_number]",default='Generalized_condition_number')
     optional.add_argument('--cond_1_name',  type=str,help="The name of condition 1 replicate",default='Condition 1')
     optional.add_argument('--cond_2_name',  type=str,help="The name of condition 2 replicate",default='Condition 2')
+    optional.add_argument('--expr_threshold',  type=float,help="The threshold to filter low expression isoforms",default=0.0)
+    optional.add_argument('--normalize',  type=str,help="Normalize the expression",default='False')
     # optional = parser.add_argument_group('optional arguments')
     # optional.add_argument('--num_iterations',type=int,default=100, help="Number of iterations for EM algorithm [default:100]")
     
@@ -138,6 +140,10 @@ def parse_arguments():
         raise Exception('No evaluation can be done for single sample data without ground truth!')
     static_data.condition_1_name = args.cond_1_name
     static_data.condition_2_name = args.cond_2_name
+    static_data.output_dir = args.output
+    static_data.low_thres = args.expr_threshold
+    if args.normalize == 'True':
+        static_data.normalize = True
     render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,args.K_value_selection)
 if __name__ == "__main__":
     parse_arguments()

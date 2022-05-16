@@ -4,3 +4,4 @@ encode_quantification/plot_func/__pycache__
 encode_quantification/report_generator/__pycache__
 encode_quantification/library/k_values/__pycache__
 encode_quantification/library/k_values/*.py
+core.*

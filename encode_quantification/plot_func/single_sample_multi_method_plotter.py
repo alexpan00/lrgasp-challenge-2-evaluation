@@ -112,7 +112,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
                     by=['group_range'], key=lambda col: custom_sort(col))
                 if (y_axis_column_name in 'nrmse'):
                     group_series[y_axis_column_name] = np.log2(group_series[y_axis_column_name]+1)
-                if (y_axis_column_name in ['nrmse','mrd','mean_arr','spearmanr','RE']):
+                if (y_axis_column_name in ['nrmse','mrd','mean_arr','median_arr','spearmanr','RE']):
                     fig.add_trace(go.Bar(x=group_series['group_range'], y=group_series[y_axis_column_name]
                     , name='{}'.format(method_name),marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
                 else:
@@ -125,7 +125,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
                     title_text=on_plot_shown_label[y_axis_column_name], row=row_num, col=col_num)
                 if (y_axis_column_name=='nrmse'):
                     fig.update_yaxes(title_text='Log2(NRMSE+1)', row=row_num, col=col_num)
-        f.close()
+        # f.close()
         fig.update_traces(showlegend=True,col=1,row=1)
         fig.update_layout(
             autosize=False,

@@ -287,8 +287,8 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
         fig.update_layout(autosize=False,width=fig_size['square']['width']*len(self.method_names),height=fig_size['square']['height']*2,template=themes['large_multi'])
         return fig
     def plot_grouped_violin(self,x_axis_column_name, y_axis_column_names, scale):
-        violin_column_names = [x for x in y_axis_column_names if x in ['nrmse','mrd','mean_arr','spearmanr','RE']]
-        line_column_names = [x for x in y_axis_column_names if x not in ['nrmse','mrd','mean_arr','spearmanr','RE']]
+        violin_column_names = [x for x in y_axis_column_names if x in ['nrmse','mrd','mean_arr','median_arr','spearmanr','RE']]
+        line_column_names = [x for x in y_axis_column_names if x not in ['nrmse','mrd','mean_arr','median_arr','spearmanr','RE']]
         line_figure_cols = math.ceil(math.sqrt(len(line_column_names)))
         line_figure_rows = math.ceil(len(line_column_names)/ line_figure_cols)
         figure_rows = line_figure_rows + len(violin_column_names)

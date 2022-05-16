@@ -9,7 +9,7 @@ from static_data import ARR_ranges, on_plot_shown_label,fig_size,color_schemes,t
 from preprocess_util import *
 from plot_func.plot_util import *
 from plot_func.plotter import Plotter
-
+import static_data
 class Single_sample_plotter(Plotter):
     def __init__(self,plot_df,anno_df):
         Plotter.__init__(self,plot_df,anno_df)
@@ -24,6 +24,7 @@ class Single_sample_plotter(Plotter):
         plot_df = plot_df.append(fill_na_df.loc[fill_na_df.index.difference(pd.Index(plot_df['group_range']))].reset_index())
         plot_df = plot_df.sort_values(
             by=['group_range'], key=lambda col: custom_sort(col, ARR_ranges))
+        plot_df[['group_range','Frequency']].to_csv(f'{static_data.output_dir}/ARR.tsv',sep='\t')
         fig = px.bar(plot_df, x='group_range',
                         y='Frequency')
         fig.update_layout(
@@ -53,6 +54,8 @@ class Single_sample_plotter(Plotter):
                     y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
             group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                 by=['group_range'], key=lambda col: custom_sort(col))
+            group_series.to_csv(f'{static_data.output_dir}/statistics_{x_axis_column_name}_{y_axis_column_name}.tsv',sep='\t')
+
             fig.add_trace(go.Scatter(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         mode='lines+markers', name=on_plot_shown_label[y_axis_column_name]), row=row_num, col=col_num)
             fig.update_xaxes(
@@ -132,6 +135,7 @@ class Single_sample_plotter(Plotter):
         fig.update_layout(
             width=fig_size['small_rec']['width'],height=fig_size['small_rec']['height'],template=themes['medium_single']
         )
+        pd.DataFrame([RE],columns=['Resolution_entropy']).to_csv(f'{static_data.output_dir}/Resolution_entropy.tsv',sep='\t')
         return fig
     def plot(self,plot_figure_name, scale):
         x_axis_column_name = single_sample_plot_figures[plot_figure_name]['x']

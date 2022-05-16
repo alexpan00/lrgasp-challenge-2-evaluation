@@ -70,7 +70,6 @@ def preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given,i
 
     estimated_df = load_data(list_of_contents[0]).set_index(0)
     kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict,num_isoforms_dict  = load_annotation(list_of_contents[1],is_long_read,K_value_selection)
-
     if (ground_truth_given):
         true_expression_df = load_data(list_of_contents[2]).set_index(0)
         intersected_index = true_expression_df.index.intersection(estimated_df.index)
@@ -81,6 +80,7 @@ def preprocess_multi_sample_diff_condition(list_of_contents,ground_truth_given,i
         true_expression_df = None
     anno_df = pd.DataFrame({'K_value':pd.Series(kvalues_dict),'num_exons':pd.Series(num_exon_dict),'isoform_length':pd.Series(isoform_length_dict),'gene':pd.Series(isoform_gene_dict),'num_isoforms':pd.Series(num_isoforms_dict)})
     anno_df.index.name = 'isoform'
+    print(anno_df.shape)
     anno_df = anno_df.reset_index()
     df = preprocess_multi_sample_diff_condition_util(estimated_df,true_expression_df, kvalues_dict,num_exon_dict,isoform_length_dict,isoform_gene_dict,num_isoforms_dict)
     

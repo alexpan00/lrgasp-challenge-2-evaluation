@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 from static_data import *
 from preprocess import *
+import static_data
 table_comment = {
     'consistency':'Consistency Measure (CM) is calculated for log2 C threshold  = 1',
     # 'consistency':'Resolution Entropy (RE) is calculated by the',
@@ -24,13 +25,16 @@ def generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read
                 row_dict['method'] = method_name
                 data.append(row_dict)
             columns = [{'name': 'Method', 'id': 'method'}]+[m for m in single_sample_table_metrics if m['id'] in data[0]]
+            for i in range(len(columns)):
+                columns[i]['name'] = columns[i]['name'].replace('_condition1','_{}'.format(static_data.condition_1_name))
+                columns[i]['name'] = columns[i]['name'].replace('_condition2','_{}'.format(static_data.condition_2_name))
         else:
             for df,method_name in zip(dfs,method_names):
                 row_dict = prepare_multi_sample_diff_conditon_table_metrics(df,ground_truth_given)
                 row_dict['method'] = method_name
                 data.append(row_dict)
             columns = [{'name': 'Method', 'id': 'method'}]+[m for m in multi_sample_diff_condition_table_metrics if m['id'] in data[0]]
-    
+    pd.DataFrame(data).to_csv(f'{static_data.output_dir}/table.tsv',sep='\t')
     for i in range(len(sections)):
         shown_columns = []
         if sections[i]['id'] == 'estimation_error':
