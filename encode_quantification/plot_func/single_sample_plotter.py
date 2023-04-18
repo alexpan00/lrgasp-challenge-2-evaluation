@@ -35,7 +35,12 @@ class Single_sample_plotter(Plotter):
         return fig
     def plot_grouped_curve(self,x_axis_column_name, y_axis_column_names, scale):
         plot_df = filter_by_scale(scale, self.plot_df)
-        plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name)
+        plot_df = plot_df[plot_df['num_isoforms'] > 1]
+        try:
+            plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name)
+        except Exception as e:
+            print(x_axis_column_name)
+            print(e)
         # fig = go.Figure()
         # figure_rows = math.ceil(math.sqrt(len(y_axis_column_names)))
         # figure_cols = math.ceil(len(y_axis_column_names)/ figure_rows)
@@ -54,7 +59,7 @@ class Single_sample_plotter(Plotter):
                     y_axis_column_name, df['true_abund'], df['estimated_abund'],df)).to_frame().reset_index()
             group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                 by=['group_range'], key=lambda col: custom_sort(col))
-            group_series.to_csv(f'{static_data.output_dir}/statistics_{x_axis_column_name}_{y_axis_column_name}.tsv',sep='\t')
+            # group_series.to_csv(f'{static_data.output_dir}/statistics_{x_axis_column_name}_{y_axis_column_name}.tsv',sep='\t')
 
             fig.add_trace(go.Scatter(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         mode='lines+markers', name=on_plot_shown_label[y_axis_column_name]), row=row_num, col=col_num)

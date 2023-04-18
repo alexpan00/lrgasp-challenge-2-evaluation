@@ -34,7 +34,7 @@ def generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read
                 row_dict['method'] = method_name
                 data.append(row_dict)
             columns = [{'name': 'Method', 'id': 'method'}]+[m for m in multi_sample_diff_condition_table_metrics if m['id'] in data[0]]
-    pd.DataFrame(data).to_csv(f'{static_data.output_dir}/table.tsv',sep='\t')
+    # pd.DataFrame(data).to_csv(f'{static_data.output_dir}/table.tsv',sep='\t')
     for i in range(len(sections)):
         shown_columns = []
         if sections[i]['id'] == 'estimation_error':

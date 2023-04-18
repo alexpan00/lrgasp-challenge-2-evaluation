@@ -208,21 +208,28 @@ annot_options = [
     {'label':'lrgasp_gencode_vM27_sirvs(mouse)','value':'mouse'},
     {'label':'Ensembl_Homo_sapiens.GRCh38.104.chr(human)','value':'ensembl_human'},
 ]
-abund_range = [0,1,2,3,4,5,6,7,8,9,10]
+# abund_range = [0,1,2,3,4,5,6,7,8,9,10]
+abund_range = [0,2,4,6]
 # num_isoforms_range = [1,3,5,7,9,11,13,15,20]
-num_isoforms_range = [1,2,3,4,5,6,7,8,9]
-num_exons_range = [1,3,5,7,9,11,13,15,20]
-K_value_ranges = [1,2,3,4,5,6,7,9,12]
-isoform_length_ranges = [0,400,800,1200,1600,2000,2400,2800,3200,3600,4000]
+# num_isoforms_range = [1,2,3,4,5,6,7,8,9]
+num_isoforms_range = [1,3,6,9]
+# num_exons_range = [1,3,5,7,9,11,13,15,20]
+num_exons_range = [1,5,10,15]
+# K_value_ranges = [1,2,3,4,5,6,7,9,12]
+K_value_ranges = [1,4,8,12]
+# isoform_length_ranges = [0,400,800,1200,1600,2000,2400,2800,3200,3600,4000]
+isoform_length_ranges = [0,1000,2000,3000]
 # K_value_ranges = [i/10 for i in range(11)] + [i*2.5 for i in range(1,5)]
 # K_value_ranges = [i/10 for i in range(11)]
 # condition_number_ranges = [i*2.5 for i in range(10)] + [i*25 for i in range(1,21,2)]
 # condition_number_ranges = [i for i in range(11)] + [i*25 for i in range(1,11)]
 # condition_number_ranges = [i for i in range(1,22,4)]
-condition_number_ranges = [1,2,3,4,5,6,7,9,12]
+# condition_number_ranges = [1,2,3,4,5,6,7,9,12]
+condition_number_ranges = [1,4,8,12]
 ARR_ranges = [i/10 for i in range(11)]
 condition_1_name = 'Condition 1'
 condition_2_name = 'Condition 2'
 output_dir = 'output'
 low_thres = 0
 normalize = False
+q = 5

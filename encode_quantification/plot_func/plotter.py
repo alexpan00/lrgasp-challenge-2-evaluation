@@ -17,7 +17,7 @@ class Plotter:
             anno_df, custom_sort = get_group_range(anno_df, x_axis_column_name)
         mean_x_axis_column = anno_df[['gene',x_axis_column_name]].groupby(by='gene').mean().mean()
         out_df = pd.DataFrame({x_axis_column_name:mean_x_axis_column})
-        out_df.to_csv(f'{static_data.output_dir}/{x_axis_column_name}_mean.tsv',sep='\t')
+        # out_df.to_csv(f'{static_data.output_dir}/{x_axis_column_name}_mean.tsv',sep='\t')
         anno_df = anno_df.groupby(by='group_range').count().reset_index()
         if (x_axis_column_name in ['num_isoforms']):
             anno_df = anno_df.rename(columns={'gene': 'Count'}).sort_values(
@@ -27,7 +27,7 @@ class Plotter:
                     by=['group_range'], key=lambda col: custom_sort(col))
         fig = px.bar(anno_df, x='group_range', y='Count')
         out_df = pd.DataFrame({'group_range':anno_df['group_range'],'Count':anno_df['Count']})
-        out_df.to_csv(f'{static_data.output_dir}/{x_axis_column_name}_distribution.tsv',sep='\t')
+        # out_df.to_csv(f'{static_data.output_dir}/{x_axis_column_name}_distribution.tsv',sep='\t')
         # fig = px.histogram(plot_df, x=x_axis_column_name, log_x=True if x_axis_transform ==
         #                    'log' else False, log_y=True if y_axis_transform == 'log' else False,width=1000,height=1000)
         fig.update_layout(

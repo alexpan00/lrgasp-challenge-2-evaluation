@@ -9,6 +9,7 @@ from plot_func.multi_method_plotter import Multi_method_plotter
 import pickle
 import pandas as pd
 import static_data
+from pathlib import Path
 all_sections = [
     {'name':'Gene features','id':'gene_features','plots':[]},
     {'name':'Methods Legend','id':'method_legend','legend':[]},
@@ -121,10 +122,13 @@ def parse_arguments():
     optional.add_argument('--cond_2_name',  type=str,help="The name of condition 2 replicate",default='Condition 2')
     optional.add_argument('--expr_threshold',  type=float,help="The threshold to filter low expression isoforms",default=0.0)
     optional.add_argument('--normalize',  type=str,help="Normalize the expression",default='False')
+    optional.add_argument('--q',  type=int,help="Quantile for groupping isoforms",default=5)
+    
     # optional = parser.add_argument_group('optional arguments')
     # optional.add_argument('--num_iterations',type=int,default=100, help="Number of iterations for EM algorithm [default:100]")
     
     args = parser.parse_args()
+    Path(args.output).mkdir(exist_ok=True,parents=True)
     ground_truth_given = args.truth is not None
     if args.num_method == 'Multi':
         is_multi_method = True
@@ -142,6 +146,7 @@ def parse_arguments():
     static_data.condition_2_name = args.cond_2_name
     static_data.output_dir = args.output
     static_data.low_thres = args.expr_threshold
+    static_data.q = args.q
     if args.normalize == 'True':
         static_data.normalize = True
     render(args.result,args.annotation,args.truth,args.output,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,args.K_value_selection)

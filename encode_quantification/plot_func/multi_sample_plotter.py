@@ -108,6 +108,7 @@ class Multi_sample_plotter(Plotter):
         return fig
     def plot_grouped_violin(self,x_axis_column_name, y_axis_column_names, scale):
         plot_df = filter_by_scale(scale, self.plot_df)
+        plot_df = plot_df[plot_df['num_isoforms'] > 1]
         plot_df, custom_sort = get_group_range(plot_df, x_axis_column_name)
         # fig = go.Figure()
         figure_rows = math.ceil(math.sqrt(len(y_axis_column_names)))
@@ -121,7 +122,7 @@ class Multi_sample_plotter(Plotter):
                     lambda df: prepare_grouped_violin_data(y_axis_column_name, df)).to_frame().reset_index()
             group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                     by=['group_range'], key=lambda col: custom_sort(col))
-            group_series.to_csv(f'{static_data.output_dir}/statistics_{x_axis_column_name}_{y_axis_column_name}_{sample}.tsv',sep='\t')
+            # group_series.to_csv(f'{static_data.output_dir}/statistics_{x_axis_column_name}_{y_axis_column_name}_{sample}.tsv',sep='\t')
         if x_axis_column_name in ['ave_estimated_abund#1','ave_estimated_abund#2']:
             return go.Figure()
         fig = make_subplots(rows=figure_rows, cols=figure_cols, vertical_spacing=0.2, horizontal_spacing=0.1)
@@ -205,7 +206,7 @@ class Multi_sample_plotter(Plotter):
             x_maxs.append(max(x))
             y_maxs.append(max(y))
             out_df = pd.DataFrame({'Log2(true abundance+1)':x,'std':y})
-            out_df.to_csv(f'{static_data.output_dir}/std_scatter_{title}.tsv',sep='\t')
+            # out_df.to_csv(f'{static_data.output_dir}/std_scatter_{title}.tsv',sep='\t')
         x_title = 'Log2(Estimated TPM+1)'
         y_title = 'Coefficient of variation'
         fig.update_xaxes(title_text=x_title,range=[1,max(x_maxs)])
@@ -247,9 +248,9 @@ class Multi_sample_plotter(Plotter):
             y_maxs.append(grouped['smoothed_{}'.format(y_axis_column_name)].max())
             title = subplot_titles[i]
             out_df = pd.DataFrame({'Log2(estimated abundance+1)':grouped[x_axis_column_name],'smoothed_std':grouped['smoothed_{}'.format(y_axis_column_name)]})
-            out_df.to_csv(f'{static_data.output_dir}/std_curve_{title}.tsv',sep='\t')
+            # out_df.to_csv(f'{static_data.output_dir}/std_curve_{title}.tsv',sep='\t')
         fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*0.85,text='ACVC',showarrow=False)
-        pd.DataFrame(aucs,index=[static_data.condition_1_name,static_data.condition_2_name],columns=['ACVC']).to_csv(f'{static_data.output_dir}/std_curve_ACVC.tsv',sep='\t')
+        # pd.DataFrame(aucs,index=[static_data.condition_1_name,static_data.condition_2_name],columns=['ACVC']).to_csv(f'{static_data.output_dir}/std_curve_ACVC.tsv',sep='\t')
         for i in range(len(x_axis_column_names)):
             fig.add_annotation(x=max(x_maxs)*0.8, y=max(y_maxs)*(0.8-i*0.1),
                 text="{}: {:.3f}".format([static_data.condition_1_name,static_data.condition_2_name][i],aucs[i]),showarrow=False)
@@ -275,14 +276,14 @@ class Multi_sample_plotter(Plotter):
             aucs.append(auc)
             fig.add_trace(go.Scatter(x=C_ranges,y=CM_list,mode='lines',name='Consistency Measure_for_{}'.format(name)))
             out_df = pd.DataFrame({'Log2 C threshold':C_ranges,'Consistency Measure':CM_list})
-            out_df.to_csv(f'{static_data.output_dir}/CM_curve_{name}.tsv',sep='\t')
+            # out_df.to_csv(f'{static_data.output_dir}/CM_curve_{name}.tsv',sep='\t')
         for auc,i in aucs,range(len(aucs)):
             fig.add_annotation(x=np.max(C_ranges)*0.8, y=np.max(CM_list)*(0.85-i*0.1),text=f'ACC_{name}: '+"{:.3f}".format(auc),showarrow=False)
         fig.update_layout(
             xaxis_title= 'Log2 C threshold',
             yaxis_title= 'Consistency Measure',
             autosize=False,showlegend=True,width=fig_size['rec']['width'],height=fig_size['rec']['height'],template= themes['small_single'])
-        pd.DataFrame(aucs,columns=['ACC']).to_csv(f'{static_data.output_dir}/CM_curve_ACC.tsv',sep='\t')
+        # pd.DataFrame(aucs,columns=['ACC']).to_csv(f'{static_data.output_dir}/CM_curve_ACC.tsv',sep='\t')
         return fig
     def plot_resolution_entropy(self,scale):
         fig = make_subplots(rows=2, cols=1,horizontal_spacing=0.1,vertical_spacing=0.1,row_titles=[static_data.condition_1_name,static_data.condition_2_name])
@@ -295,7 +296,7 @@ class Multi_sample_plotter(Plotter):
             M = on_plot_shown_label[cond1_metric_dict['Metric']]
             fig.add_trace(go.Bar(x=[M],y=[cond1_metric_dict['Mean']],error_y=dict(type='data',array=[cond1_metric_dict['Error']]),showlegend=False),row=1,col=i+1)
             fig.add_trace(go.Bar(x=[M],y=[cond2_metric_dict['Mean']],error_y=dict(type='data',array=[cond2_metric_dict['Error']]),showlegend=False),row=2,col=i+1)
-        pd.DataFrame([cond1_metric_dict['Mean'],cond2_metric_dict['Mean']],index=[static_data.condition_1_name,static_data.condition_2_name],columns=['Resolution_entropy']).to_csv(f'{static_data.output_dir}/Resolution_entropy.tsv',sep='\t')
+        # pd.DataFrame([cond1_metric_dict['Mean'],cond2_metric_dict['Mean']],index=[static_data.condition_1_name,static_data.condition_2_name],columns=['Resolution_entropy']).to_csv(f'{static_data.output_dir}/Resolution_entropy.tsv',sep='\t')
         fig.update_traces(showlegend=False,col=1,row=1)
         fig.update_layout(
             width=540,

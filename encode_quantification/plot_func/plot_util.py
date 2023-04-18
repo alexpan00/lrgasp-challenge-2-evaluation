@@ -3,7 +3,7 @@ import plotly.io as pio
 import numpy as np
 import pandas as pd
 import math
-
+import static_data
 from static_data import *
 from preprocess_util import *
 
@@ -142,14 +142,20 @@ def get_group_range(plot_df, groupby):
         # qcutted_str[qcutted_str == str(categories[-1])] = '({}, 1)'.format(categories[-1].left)
         # plot_df.loc[plot_df[groupby]<1, 'group_range'] = qcutted_str
         # plot_df.loc[plot_df[groupby]>=1, 'group_range'] = '>= 1'
-        ranges = condition_number_ranges
-        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
-        categories = cutted.cat.categories
+        # ranges = condition_number_ranges
+        # cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        # categories = cutted.cat.categories
+        # plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        # plot_df.loc[plot_df[groupby] > ranges[-1],
+        #             'group_range'] = '>{}'.format(ranges[-1])
+        # plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
+        try:
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q)
+        except:
+            cutted,bins = pd.qcut(plot_df[groupby],q=static_data.q,duplicates='drop',retbins=True)
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q - (bins.shape[0] - 1) + static_data.q,duplicates='drop')        
+            # categories = cutted.cat.categories
         plot_df.loc[:, 'group_range'] = cutted.astype(str)
-        plot_df.loc[plot_df[groupby] > ranges[-1],
-                    'group_range'] = '>{}'.format(ranges[-1])
-        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
-
         # qcutted = pd.qcut(plot_df[groupby], 9,duplicates='drop')
         # categories = qcutted.cat.categories
         # qcutted_str = qcutted.astype(str)
@@ -196,13 +202,20 @@ def get_group_range(plot_df, groupby):
                     # vals.append(float(val[1:]))
                     vals.append(float('inf'))
             return pd.Series(vals)
-        ranges = abund_range
-        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        try:
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q)
+        except:
+            cutted,bins = pd.qcut(plot_df[groupby],q=static_data.q,duplicates='drop',retbins=True)
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q - (bins.shape[0] - 1) + static_data.q,duplicates='drop')
         categories = cutted.cat.categories
         plot_df.loc[:, 'group_range'] = cutted.astype(str)
-        plot_df.loc[plot_df[groupby] > ranges[-1],
-                    'group_range'] = '>{}'.format(ranges[-1])
-        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
+        # ranges = abund_range
+        # cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        # categories = cutted.cat.categories
+        # plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        # plot_df.loc[plot_df[groupby] > ranges[-1],
+        #             'group_range'] = '>{}'.format(ranges[-1])
+        # plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
 
         # qcutted = pd.qcut(plot_df[groupby], 9,duplicates='drop')
         # categories = qcutted.cat.categories
@@ -234,13 +247,20 @@ def get_group_range(plot_df, groupby):
                     # vals.append(float(val[1:]))
                     vals.append(float('inf'))
             return pd.Series(vals)
-        ranges = isoform_length_ranges
-        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        # ranges = isoform_length_ranges
+        # cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+        # categories = cutted.cat.categories
+        # plot_df.loc[:, 'group_range'] = cutted.astype(str)
+        # plot_df.loc[plot_df[groupby] > ranges[-1],
+        #             'group_range'] = '>{}'.format(ranges[-1])
+        # plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
+        try:
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q)
+        except:
+            cutted,bins = pd.qcut(plot_df[groupby],q=static_data.q,duplicates='drop',retbins=True)
+            cutted = pd.qcut(plot_df[groupby],q=static_data.q - (bins.shape[0] - 1) + static_data.q,duplicates='drop')
         categories = cutted.cat.categories
         plot_df.loc[:, 'group_range'] = cutted.astype(str)
-        plot_df.loc[plot_df[groupby] > ranges[-1],
-                    'group_range'] = '>{}'.format(ranges[-1])
-        plot_df.loc[plot_df['group_range'] == str(categories[0]),'group_range'] = '[{},{}]'.format(ranges[0],categories[0].right)
         plot_df = plot_df[plot_df['group_range'] != 'nan']
         # plot_df[groupby] = plot_df[groupby].astype(int)
         # plot_df = plot_df.dropna()
@@ -275,17 +295,30 @@ def get_group_range(plot_df, groupby):
                     vals.append(float('inf'))
             return pd.Series(vals)
         if groupby == 'num_exons':
-            ranges = num_exons_range
+            ranges = num_exons_range   
+            try:
+                cutted = pd.qcut(plot_df[groupby],q=static_data.q)
+            except:
+                cutted,bins = pd.qcut(plot_df[groupby],q=static_data.q,duplicates='drop',retbins=True)
+                cutted = pd.qcut(plot_df[groupby],q=static_data.q - (bins.shape[0] - 1) + static_data.q,duplicates='drop')
+            categories = cutted.cat.categories
+            plot_df.loc[:, 'group_range'] = cutted.astype(str)
+            plot_df = plot_df[plot_df['group_range'] != 'nan']
         else:
             ranges = num_isoforms_range
-        cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
-        categories = cutted.cat.categories
-        plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
-        plot_df.loc[plot_df[groupby] > ranges[-1],
-                    'group_range'] = '>{}'.format(ranges[-1])
-        plot_df.loc[plot_df['group_range'] == str(
-            categories[0]), 'group_range'] = '[{}, {}]'.format(int(ranges[0]), int(categories[0].right))
-        plot_df = plot_df[plot_df['group_range'] != 'nan']
+            if static_data.q == 5:
+                ranges = [1,2,3,4,6]
+            else:
+                ranges = [1,2,3,4,5,6,7,8,9,10]
+            cutted = pd.cut(plot_df[groupby], ranges,include_lowest=True)
+            categories = cutted.cat.categories
+            plot_df.loc[:, 'group_range'] = cutted.apply(lambda x:str(x)).astype(str)
+            plot_df.loc[plot_df[groupby] > ranges[-1],
+                        'group_range'] = '>{}'.format(ranges[-1])
+            plot_df.loc[plot_df['group_range'] == str(
+                categories[0]), 'group_range'] = '[{}, {}]'.format(int(ranges[0]), int(categories[0].right))
+            plot_df = plot_df[plot_df['group_range'] != 'nan']
+        
         return plot_df, custom_sort
     else:
         def custom_sort(col):
