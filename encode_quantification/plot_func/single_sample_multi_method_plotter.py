@@ -118,7 +118,7 @@ class Single_sample_multi_method_plotter(Multi_method_plotter):
                 else:
                     fig.add_trace(go.Scatter(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         mode='lines+markers', name='{}'.format(method_name),marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
-                pickle.dump([method_name, x_axis_column_name,group_series],f)
+                # pickle.dump([method_name, x_axis_column_name,group_series],f)
                 fig.update_xaxes(
                     title_text=on_plot_shown_label[x_axis_column_name],tickangle = 45, row=row_num, col=col_num)
                 fig.update_yaxes(

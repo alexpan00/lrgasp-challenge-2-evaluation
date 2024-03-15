@@ -94,8 +94,8 @@ def render(quantif_res_path,annotation_path,truth_path,output_path,is_multi_samp
 
     else:
         dfs,anno_df,method_names = preprocess_file(quantif_res_path,annotation_path,truth_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection) 
-        with open('{}/df.pkl'.format(output_path),'wb') as f:
-            pickle.dump(dfs,f)
+        # with open('{}/df.pkl'.format(output_path),'wb') as f:
+        #     pickle.dump(dfs,f)
         args = (dfs,anno_df,method_names)
         sections = make_plots(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)
         sections = generate_table(args,output_path,is_multi_sample,is_multi_method,is_long_read,ground_truth_given,K_value_selection,sections)

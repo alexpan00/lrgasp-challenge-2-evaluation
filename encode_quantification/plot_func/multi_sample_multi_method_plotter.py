@@ -323,7 +323,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                 error_y = dict(type='data',array=error_bar_group_series['Error'])
                 if (error_y['array'].isna()).all():
                     error_y = None
-                pickle.dump([method_name, x_axis_column_name,group_series,mean_series,error_series],f)
+                # pickle.dump([method_name, x_axis_column_name,group_series,mean_series,error_series],f)
                 fig.add_trace(go.Bar(x=error_bar_group_series['group_range'],y=error_bar_group_series['Mean'],error_y=error_y,name=method_name,showlegend=False,marker_color=color_schemes[j]),row=row_num,col=col_num)
                 # fig.add_trace(go.Violin(x=group_series['group_range'], y=group_series[y_axis_column_name],offsetgroup=j,
                 #                                 name=method_name, box_visible=False, meanline_visible=False,marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
@@ -340,7 +340,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                     lambda df: prepare_grouped_violin_data(y_axis_column_name, df)).to_frame().reset_index()
                 group_series = group_series.rename(columns={0: y_axis_column_name}).sort_values(
                     by=['group_range'], key=lambda col: custom_sort(col))
-                pickle.dump([method_name, x_axis_column_name,group_series],f)
+                # pickle.dump([method_name, x_axis_column_name,group_series],f)
                 if y_axis_column_name=='RE':
                     fig.add_trace(go.Bar(x=group_series['group_range'], y=group_series[y_axis_column_name],
                                         name=method_name,marker_color=color_schemes[j],showlegend=False), row=row_num, col=col_num)
@@ -351,7 +351,7 @@ class Multi_sample_multi_method_plotter(Multi_method_plotter):
                     title_text=on_plot_shown_label[x_axis_column_name],tickangle = 45, row=row_num, col=col_num)
                 fig.update_yaxes(
                     title_text=on_plot_shown_label[y_axis_column_name], row=row_num, col=col_num)
-        f.close()
+        # f.close()
         fig.update_traces(showlegend=True,col=1,row=1)
         # fig.update_traces(line=dict(width=3))
         fig.update_layout(
