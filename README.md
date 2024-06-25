@@ -8,10 +8,10 @@ Running python 3.7 and linux64 on your machine
 ```
 git clone https://github.com/Tidesun/LRGASP_visualization.git
 cd LRGASP_visualization
-python -m venv base
-source base/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+conda create --name ch2 python=3.7
+mamba activate ch2
+mamba install --file requirements.txt
+pip install dash-uploader
 ```
 ## Input 
 - Gene/isoform annotation: GTF format
